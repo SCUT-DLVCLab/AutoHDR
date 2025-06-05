@@ -5,7 +5,9 @@
 </div>
 
 ## 🌟 Highlights
+- AutoHDR
 ![Vis_1](images/pipeline.png)
+- FPHDR dataset
 ![Vis_2](images/example.png)
 - We propose a novel fully Automated solution for HDR **(AutoHDR)** , inspired by mirroring the workflow of expert historians.
 - We introduce a pioneer Full-Page HDR dataset **(FPHDR)**, which supports comprehensive HDR model training and evaluation. 
