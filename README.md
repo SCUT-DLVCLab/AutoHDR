@@ -9,7 +9,7 @@
 
 ## 📅 News
 
-- **2025.05.15**: 🎉🎉 Our paper is accepted by ACL2025 main.
+- **2025.05.15**: 🎉🎉 Our paper is accepted by ACL2025.
 
 ## 🚧 TODO List
 
