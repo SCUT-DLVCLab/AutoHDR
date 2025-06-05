@@ -6,10 +6,10 @@
 
 <div align=center>
 
-[![arXiv preprint](http://img.shields.io/badge/arXiv-2312.12142-b31b1b)](https://github.com/SCUT-DLVCLab/AutoHDR) 
-[![Gradio demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-FontDiffuser-ff7c00)](https://github.com/SCUT-DLVCLab/AutoHDR)
-[![Homepage](https://img.shields.io/badge/Homepage-FontDiffuser-green)]([https://](https://github.com/SCUT-DLVCLab/AutoHDR))
-[![Code](https://img.shields.io/badge/Code-FontDiffuser-yellow)](https://github.com/SCUT-DLVCLab/AutoHDR)
+<!-- [![arXiv preprint](http://img.shields.io/badge/arXiv-2312.12142-b31b1b)](https://github.com/SCUT-DLVCLab/AutoHDR)  -->
+[![Gradio demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-AutoHDR-ff7c00)](https://github.com/SCUT-DLVCLab/AutoHDR)
+[![Homepage](https://img.shields.io/badge/Homepage-AutoHDR-green)]([https://](https://github.com/SCUT-DLVCLab/AutoHDR))
+[![Code](https://img.shields.io/badge/Code-AutoHDR-yellow)](https://github.com/SCUT-DLVCLab/AutoHDR)
 
 </div>
 
