@@ -30,7 +30,7 @@
 - [ ] Push demo to Hugging Face.
 
 ## 🌄 Gallery
-
+![Vis_3](images/result.png)
 
 ## 💙 Acknowledgement
 - [DiffHDR](https://github.com/yeungchenwa/HDR)
