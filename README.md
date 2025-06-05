@@ -29,8 +29,14 @@
 - [ ] Add pre-trained model checkpoints.
 - [ ] Push demo to Hugging Face.
 
+## 🌄 Gallery
+
+
 ## 💙 Acknowledgement
+- [DiffHDR](https://github.com/yeungchenwa/HDR)
 - [diffusers](https://github.com/huggingface/diffusers)
+- [HisDoc1B](https://github.com/SCUT-DLVCLab/HisDoc1B)
+- [MegaHan97K](https://github.com/SCUT-DLVCLab/MegaHan97K)
 
 ## Copyright
 - This repository can only be used for non-commercial research purposes.
