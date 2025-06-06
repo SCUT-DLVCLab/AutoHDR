@@ -9,6 +9,7 @@
 <div align=center>
 
 <!-- [![arXiv preprint](http://img.shields.io/badge/arXiv-2312.12142-b31b1b)](https://github.com/SCUT-DLVCLab/AutoHDR)  -->
+[![GitHub ZZXF11](https://img.shields.io/badge/GitHub-ZZXF11-blueviolet?logo=github)](https://github.com/ZZXF11)
 [![SCUT DLVC Lab](https://img.shields.io/badge/SCUT-DLVC_Lab-327FE6?logo=Academia&logoColor=white)](http://dlvc-lab.net/lianwen/)
 [![Gradio demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-AutoHDR-ff7c00)](https://github.com/SCUT-DLVCLab/AutoHDR)
 [![Homepage](https://img.shields.io/badge/Homepage-AutoHDR-green)]([https://](https://github.com/SCUT-DLVCLab/AutoHDR))
@@ -57,7 +58,10 @@ If you have any questions, feel free to contact [Yuyi Zhang](https://github.com/
 - [HisDoc1B](https://github.com/SCUT-DLVCLab/HisDoc1B)
 - [MegaHan97K](https://github.com/SCUT-DLVCLab/MegaHan97K)
 
-## Copyright
+## 📜 License
+The code and dataset should be used and distributed under [ (CC BY-NC-ND 4.0)](https://creativecommons.org/licenses/by-nc-nd/4.0/) for non-commercial research purposes.
+
+## ⛔️ Copyright
 - This repository can only be used for non-commercial research purposes.
 - For commercial use, please contact Prof. Lianwen Jin (eelwjin@scut.edu.cn).
 - Copyright 2025, [Deep Learning and Vision Computing Lab (DLVC-Lab)](http://www.dlvc-lab.net), South China University of Technology. 
