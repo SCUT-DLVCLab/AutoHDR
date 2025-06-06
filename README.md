@@ -54,6 +54,17 @@
 - For commercial use, please contact Prof. Lianwen Jin (eelwjin@scut.edu.cn).
 - Copyright 2025, [Deep Learning and Vision Computing Lab (DLVC-Lab)](http://www.dlvc-lab.net), South China University of Technology. 
 
+## ✒️Citation
+If you find AutoHDR helpful, please consider giving this repo a ⭐ and citing:
+```latex
+@article{Zhang2025autohdr,
+      title={Reviving Cultural Heritage: A Novel Approach for Comprehensive Historical Document Restoration}, 
+      author={Yuyi Zhang and Peirong Zhang and Zhenhua Yang and Pengyu Yan and Yongxin Shi and Pengwei Liu and Fengjun Guo and Lianwen Jin},
+      journal={Proceedings of the 63nd Annual Meeting of the Association for Computational Linguistics},
+      year={2025},
+}
+```
+Thanks for your support!
 
 ## ⭐ Star Rising
 [![Star Rising](https://api.star-history.com/svg?repos=SCUT-DLVCLab/AutoHDR&type=Timeline)](https://star-history.com/#SCUT-DLVCLab/AutoHDR&Timeline)
