@@ -34,7 +34,7 @@
 ## 🚧 TODO List
 
 - [ ] Release inference code and documentation
-  - [ ] Add inference examples
+  - [x] Add inference examples
   - [ ] Add requirements.txt
   - [ ] Add detailed usage instructions
 - [ ] Release dataset
@@ -42,7 +42,6 @@
   - [ ] Test split
   - [ ] Dataset documentation
 - [ ] Add pre-trained model checkpoints.
-- [ ] Push demo to Hugging Face.
 
 ## ☎️ Cotact
 If you have any questions, feel free to contact [Yuyi Zhang](https://github.com/ZZXF11) at [yuyi.zhang11@foxmail.com](yuyi.zhang11@foxmail.com)
