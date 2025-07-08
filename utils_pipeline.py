@@ -10,12 +10,12 @@ from typing import List, Tuple
 import math
 
 font_list = [
-    'font/KaiXinSongA.ttf',
-    'font/KaiXinSongB.ttf',
-    'font/TH-Tshyn-P0.ttf',
-    'font/TH-Tshyn-P1.ttf',
-    'font/TH-Tshyn-P2.ttf',
-    'font/TH-Tshyn-P16.ttf',
+    'demo_utils/font/KaiXinSongA.ttf',
+    'demo_utils/font/KaiXinSongB.ttf'
+    #'font/TH-Tshyn-P0.ttf',
+    #'font/TH-Tshyn-P1.ttf',
+    #'font/TH-Tshyn-P2.ttf',
+    #'font/TH-Tshyn-P16.ttf',
 ]
 
 

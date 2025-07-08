@@ -89,6 +89,8 @@ def detect(
     return res_dic
 
 def main(data, opt):
+
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 加载破损检测模型 dino
