@@ -8,7 +8,7 @@
 
 <div align=center>
 
-<!-- [![arXiv preprint](http://img.shields.io/badge/arXiv-2312.12142-b31b1b)](https://github.com/SCUT-DLVCLab/AutoHDR)  -->
+[![arXiv preprint](http://img.shields.io/badge/arXiv-2507.05108-b31b1b)](https://arxiv.org/abs/2507.05108) 
 [![GitHub ZZXF11](https://img.shields.io/badge/GitHub-ZZXF11-blueviolet?logo=github)](https://github.com/ZZXF11)
 [![SCUT DLVC Lab](https://img.shields.io/badge/SCUT-DLVC_Lab-327FE6?logo=Academia&logoColor=white)](http://dlvc-lab.net/lianwen/)
 [![Gradio demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-AutoHDR-ff7c00)](https://github.com/SCUT-DLVCLab/AutoHDR)
@@ -28,8 +28,8 @@
 - The modular design enables flexible adjustments, allowing AutoHDR to collaborate effectively with historians.
 
 ## 📅 News
-
-- **2025.05.15**: 🎉🎉 Our paper is accepted by ACL2025 main.
+- **2025.07.08**: Our paper(https://arxiv.org/abs/2507.05108) is now available on arXiv.
+- **2025.05.15**: 🎉🎉 Our paper(https://arxiv.org/abs/2507.05108) is accepted by ACL2025 main.
 
 ## 🚧 TODO List
 
