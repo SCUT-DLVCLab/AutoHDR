@@ -30,9 +30,11 @@ def main_wrapper(image, choice):
 
 
 parser = argparse.ArgumentParser(prog='test.py')
-parser.add_argument('--weights', nargs='+', type=str, default='/data1/zyy/AutoHDR/ckpt/best.pt', help='model.pt path(s)')
-parser.add_argument('--degraded-weights', nargs='+', type=str, default='/data1/zyy/AutoHDR/ckpt/damage_detect.pth', help='model.pt path(s)')
-parser.add_argument('--data', type=str, default='data_path', help='*.data path')
+parser.add_argument('--ocr_det_weights', nargs='+', type=str, default='./ckpt/best.pt', help='model.pt path(s)')
+parser.add_argument('--vague_det_weights', nargs='+', type=str, default='./ckpt/damage_detect.pth', help='model.pth path(s)')
+parser.add_argument('--vague_det_config', nargs='+', type=str, default='./ckpt/damage_detect.py', help='mmdetection config.py path(s)')
+parser.add_argument('--model_name_or_path', nargs='+', type=str, default='./ckpt/AutoHDR-Qwen2-7B', help='llm weight path(s)')
+
 parser.add_argument('--det-batch-size', type=int, default=1, help='size of each image batch')
 parser.add_argument('--reg-batch-size', type=int, default=36, help='size of each image batch')
 parser.add_argument('--img-size', type=int, default=2048, help='inference size (pixels)')

@@ -7,6 +7,8 @@ def batch_char_recog(model, device, char_dict, char_ims, bs):
     imgs_crop   = []
     pred_output = []
     pred_prob   = []
+    
+
 
     for idx, im in enumerate(char_ims):
         # 长边缩放到96, 短边等比例缩放

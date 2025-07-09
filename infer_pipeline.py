@@ -51,6 +51,9 @@ def detect(
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
+
+
     # Load model
     gs = max(int(model.stride.max()), 32)
     imgsz = check_img_size(imgsz, s=gs)  # check img_size
@@ -90,14 +93,34 @@ def detect(
 
 def main(data, opt):
 
-    
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    yield "开始修复...", None
 
+    data_path_api = 'api_test.png'
+    data.save(data_path_api)
+    data = data_path_api
+    opt.data = data
+
+    if opt.seed is not None:
+        set_seed(opt.seed)
+    
+    save_path = './results'
+
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    img_dir = os.path.join(save_path, 'img')
+    if not os.path.exists(img_dir):
+        os.makedirs(img_dir)
+
+    combined_dir = os.path.join(save_path, 'combined')
+    if not os.path.exists(combined_dir):
+        os.makedirs(combined_dir)
+
+
+    yield "加载模型...", None
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   
     # 加载破损检测模型 dino
-    model_det_vague = init_detector(config_file, damage_detect_checkpoint_file, device=device)
-
-    
-
+    model_det_vague = init_detector(opt.vague_det_config, opt.vague_det_weights, device=device)
     dicp = 'ckpt/dic_31556.txt'
     char_dict = open(dicp, encoding='utf-8').read().splitlines()
     det_model = attempt_load(opt.ocr_det_weights, map_location=device)
@@ -105,15 +128,18 @@ def main(data, opt):
     reg_model = torch.nn.DataParallel(reg_model).to(device)
     reg_model.load_state_dict(torch.load('ckpt/ocr_reg.pth')['state_dict'])
 
+    #img = Image.open(data).convert('RGB')
+    #img = data if isinstance(data, Image.Image) else Image.open(data).convert('RGB')
+    yield "OSTU二值化...", None
 
     img = Image.open(data).convert('RGB')
-    
     img_invert = invert_image(img)
-    img_invert_path = 'tmp_img/invert_tmp7.jpg'
+    img_invert_path = 'tmp_img/api_tmp.jpg'
     img_invert.save(img_invert_path)
     img_invert_gray = Image.open(img_invert_path).convert('L').convert('RGB')
-    
 
+    print('detecting...')
+    yield "OCR检测...", None
     ##### 这里是破损检测模型
     # 破损检测模型是灰度输入的
     results = inference_detector(model_det_vague, np.array(img_invert_gray))
@@ -146,11 +172,15 @@ def main(data, opt):
 
     im = cv2.imread(img_invert_path, 0)
 
+    print('recognizing...')
+    yield "OCR识别...", None    
+
     # 这里首先对OCR检测框进行识别
     char_ims = []
     for line in ocr_det_bbox:
         x1, y1, x2, y2 = [round(float(k)) for k in line]
         char_ims.append(im[y1:y2, x1:x2])
+
     output_chars, output_probs = batch_char_recog(reg_model, device, char_dict, char_ims, bs=opt.reg_batch_size)
 
     # 破损检测框中的字也需要被识别
@@ -190,6 +220,9 @@ def main(data, opt):
                 # 重合的时候我只要破损检测框，没啥问题这一步
                 to_remove.add(idx)
     
+    print('arrange...')
+    yield "处理阅读顺序...", None
+
     # 创建一个新的结果列表来拼接 这个用来做阅读顺序的，只是一个list
     final_results = []
     # 添加degraded_removed_detect_result中的结果
@@ -252,15 +285,21 @@ def main(data, opt):
     print(f'识别字符：【{num_ocr}】个，识别破损位置：【{num_degraded}】个')
     char_str = ''.join(chars_list)
     
-
+    yield f'识别字符：【{num_ocr}】个，识别破损位置：【{num_degraded}】个', None
+    yield 'OCR识别结果...', None
+ 
     char_str = convert(char_str, 'zh-cn')
     char_str = cc.convert(char_str)
+    yield char_str, None
 
     del model_det_vague
     del det_model
     del reg_model
 
     torch.cuda.empty_cache()
+
+    print('predicting...')
+    yield "预测缺失文本...", None
     model_name_or_path = opt.model_name_or_path
     model, tokenizer = model_init(model_name_or_path)
 
@@ -714,12 +753,17 @@ def main(data, opt):
     # restore_img.save('restored_image.png')
     # combined.save('combined_image_1.png')
 
+    if restore_img is not None:
+        restore_img.save(os.path.join(f'{save_path}/img', 'tmp.jpg'))
+        combined.save(os.path.join(f'{save_path}/combined', 'tmp.jpg'))
+
     del pipeline
     del unet
     del generator
     torch.cuda.empty_cache()
     # import pdb; pdb.set_trace()
-    return restore_img, combined
+    yield "修复完成",restore_img
+    return "修复完成",restore_img
 
 if __name__ == '__main__':
 
@@ -733,6 +777,7 @@ if __name__ == '__main__':
     parser.add_argument('--vague_det_weights', nargs='+', type=str, default=damage_detect_checkpoint_file, help='model.pth path(s)')
     parser.add_argument('--vague_det_config', nargs='+', type=str, default=config_file, help='mmdetection config.py path(s)')
     parser.add_argument('--model_name_or_path', nargs='+', type=str, default=model_name_or_path, help='llm weight path(s)')
+
     parser.add_argument('--det-batch-size', type=int, default=1, help='size of each image batch')
     parser.add_argument('--reg-batch-size', type=int, default=36, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=2048, help='inference size (pixels)')

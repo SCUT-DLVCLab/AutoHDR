@@ -28,20 +28,57 @@
 - The modular design enables flexible adjustments, allowing AutoHDR to collaborate effectively with historians.
 
 ## 📅 News
+- **2025.07.09**: Release inference code.
 - **2025.07.08**: Our [paper](https://arxiv.org/abs/2507.05108) is now available on arXiv.
 - **2025.05.15**: 🎉🎉 Our [paper](https://arxiv.org/abs/2507.05108) is accepted by ACL2025 main.
 
 ## 🚧 TODO List
 
-- [ ] Release inference code and documentation
-  - [x] Add inference examples
-  - [ ] Add requirements.txt
-  - [ ] Add detailed usage instructions
+- [x] Release inference code
 - [ ] Release dataset
-  - [ ] Training data samples
-  - [ ] Test split
-  - [ ] Dataset documentation
-- [ ] Add pre-trained model checkpoints.
+- [ ] Release a WebUI
+- [ ] Release an interactive WebUI
+
+## 🔥 Model Zoo
+| **Model**                                    | **chekcpoint** | **status** |
+|----------------------------------------------|----------------|------------|
+| **AutoHDR-Qwen2-1.5B**                   | [BaiduYun:W2wq](https://pan.baidu.com/s/1j_HmyNDG0dOD6TyBHvqYwQ?pwd=W2wq) | Released  |
+| **AutoHDR-Qwen2-7B**                     | [BaiduYun:6o84](https://pan.baidu.com/s/1CUREGQIBoed1BgHjELguTQ?pwd=6o84) | Released  |
+| **DiffHDR**                              | [BaiduYun:63a3](https://pan.baidu.com/s/1fSKd5uQsiKp2uPQBdKtC3Q?pwd=63a3) | Released  |
+| **Damage Localization Model**            | [BaiduYun:2QC7](https://pan.baidu.com/s/1wGcT6Ktzqg_bOyc8NsV4Ig?pwd=2QC7) | Released  |
+
+
+## 🚧 Installation
+### Prerequisites (Recommended)
+- Linux
+- Python 3.10
+- Pytorch 2.3.0
+- CUDA 11.8
+
+### Environment Setup
+Clone this repo:
+```bash
+git clone https://github.com/SCUT-DLVCLab/AutoHDR.git
+```
+
+**Step 0**: Download and install Miniconda from the [official website](https://docs.conda.io/en/latest/miniconda.html).
+
+**Step 1**: Create a conda environment and activate it.
+```bash
+conda create -n autohdr python=3.10 -y
+conda activate autohdr
+```
+
+**Step 2**: Install the required packages.
+```bash
+pip install -r requirements.txt
+```
+
+## 📺 Inference
+Using AutoHDR for damaged historical documents repair:
+```bash
+CUDA_VISIBLE_DEVICES=<gpu_id> python infer_pipeline.py
+```
 
 ## ☎️ Cotact
 If you have any questions, feel free to contact [Yuyi Zhang](https://github.com/ZZXF11) at [yuyi.zhang11@foxmail.com](yuyi.zhang11@foxmail.com)
