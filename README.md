@@ -35,6 +35,7 @@
 ## 🚧 TODO List
 
 - [x] Release inference code
+- [x] Release pretrained model
 - [ ] Release dataset
 - [ ] Release a WebUI
 
@@ -46,6 +47,7 @@
 | **AutoHDR-Qwen2-7B**                     | [BaiduYun:6o84](https://pan.baidu.com/s/1CUREGQIBoed1BgHjELguTQ?pwd=6o84) | Released  |
 | **DiffHDR**                              | [BaiduYun:63a3](https://pan.baidu.com/s/1fSKd5uQsiKp2uPQBdKtC3Q?pwd=63a3) | Released  |
 | **Damage Localization Model**            | [BaiduYun:2QC7](https://pan.baidu.com/s/1wGcT6Ktzqg_bOyc8NsV4Ig?pwd=2QC7) | Released  |
+| **OCR Model**            | - | Coming soon...  |
 
 
 ## 🚧 Installation

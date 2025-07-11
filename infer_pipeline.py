@@ -38,6 +38,8 @@ from scipy.ndimage import label as ndimage_label
 cc = OpenCC('s2t')
 ss = OpenCC('t2s')
 
+
+
 def detect(
          opt,
          model,
