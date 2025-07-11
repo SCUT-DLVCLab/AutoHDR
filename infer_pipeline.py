@@ -121,12 +121,13 @@ def main(data, opt):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   
     # 加载破损检测模型 dino
     model_det_vague = init_detector(opt.vague_det_config, opt.vague_det_weights, device=device)
-    dicp = 'ckpt/dic_31556.txt'
+    dicp = 'ckpt/dic_31524.txt'
     char_dict = open(dicp, encoding='utf-8').read().splitlines()
     det_model = attempt_load(opt.ocr_det_weights, map_location=device)
-    reg_model = vit_base_im96_patch8(num_classes=31556)
+    reg_model = vit_base_im96_patch8(num_classes=31524)
     reg_model = torch.nn.DataParallel(reg_model).to(device)
-    reg_model.load_state_dict(torch.load('ckpt/ocr_reg.pth')['state_dict'])
+    # reg_model.load_state_dict(torch.load('ckpt/ocr_reg.pth')['state_dict'])
+    reg_model.load_state_dict(torch.load('./epoch79.pth')['state_dict'])
 
     #img = Image.open(data).convert('RGB')
     #img = data if isinstance(data, Image.Image) else Image.open(data).convert('RGB')
@@ -420,7 +421,11 @@ def main(data, opt):
                     # print(f"出现多token 解码失败的情况")
                     # import pdb; pdb.set_trace()
 
+    yield '缺失内容预测结果...', None
+    yield str(output_matches), None
+
     print('开始加载修复模型')
+    yield "加载修复模型...", None
     del model
     del tokenizer
     torch.cuda.empty_cache()
@@ -434,6 +439,8 @@ def main(data, opt):
     generator = torch.Generator(device=pipeline.device).manual_seed(opt.seed)
 
     print('开始切patches')
+    yield "根据破损字符位置对图像切块...", None
+
     patch_size = 448
     stride = 224
     stride_x = 224
@@ -571,11 +578,14 @@ def main(data, opt):
                     patches.append((patch, patch_info))
     # print(f'img{i} success, patch num: {len(patches)}')
     print(f'共有{len(patches)}个patch')
+    yield f'共有{len(patches)}个patch', None
     # import pdb; pdb.set_trace()
 
     print_i = 0
     for patch in tqdm(patches):
+        
         print_i += 1
+        yield f"正在修复第{print_i}个patch...", None
         # 图像块的左上角和右下角坐标
         xmin, ymin, xmax, ymax = patch[1]['position']
         # degraded_image = patch[0]
@@ -762,8 +772,54 @@ def main(data, opt):
     del generator
     torch.cuda.empty_cache()
     # import pdb; pdb.set_trace()
-    yield "修复完成",restore_img
-    return "修复完成",restore_img
+#    yield "修复完成",restore_img
+
+###标识
+
+    yield "正在标识结果...", None
+    image_to_repair_mark = restore_img.copy()
+    draw = ImageDraw.Draw(image_to_repair_mark)
+
+    try:
+        font = ImageFont.truetype("demo_utils/font/KaiXinSongA.ttf", 20)  # 这里使用系统字体"宋体"
+    except IOError:
+        font = ImageFont.load_default() 
+
+    colors = ['blue', 'green', 'purple', 'orange', 'brown', 'cyan', 'magenta', 'yellow', 'pink', 'gray']
+
+    for idx,patch in tqdm(enumerate(patches)): 
+        #图像块坐标
+        xmin, ymin, xmax, ymax = patch[1]['position']
+        color = colors[idx % len(colors)]
+        # 绘制边框
+        draw.rectangle([xmin, ymin, xmax, ymax], outline=color, width=2)
+        label = f"Patch {idx+1} ({patch_size}x{patch_size})"
+        draw.text((xmin, ymin), label, fill=color, font=font)
+        #处理修复字符
+        for bbox_name in patch[1]['intersect_bboxes']:
+            bbox_info = extra_num_ocr_prob_dict[bbox_name]
+            bx_min, by_min, bw, bh = bbox_info['bbox']
+            bx_max = bx_min + bw; by_max = by_min + bh
+            
+            # # 确保坐标在patch范围内
+            # rel_x_min = max(0, int(bx_min - xmin))
+            # rel_y_min = max(0, int(by_min - ymin))
+            # rel_x_max = min(patch_size, int(bx_max - xmin))
+            # rel_y_max = min(patch_size, int(by_max - ymin))
+            
+            # 只有当有效区域大于0时才绘制
+            if rel_x_max > rel_x_min and rel_y_max > rel_y_min:
+                combined_mask[rel_y_min:rel_y_max, rel_x_min:rel_x_max] = 255      
+                #绘制字框
+                draw.rectangle([bx_min, by_min, bx_max, by_max], outline=colors[(idx+1) % len(colors)], width=2)
+                #绘制字
+                text = bbox_info['txt']
+                draw.text((bx_min, by_min), text, fill='red', font=font)
+    yield "标识完成",None
+    yield "标识完成",image_to_repair_mark
+    
+###
+    return "修复完成",image_to_repair_mark
 
 if __name__ == '__main__':
 

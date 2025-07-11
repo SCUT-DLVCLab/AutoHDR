@@ -12,7 +12,7 @@ import argparse
 #     else:
 #         yield from pipline_qwen_multisptk_fssj_api.main(image, opt)
 
-def main_wrapper(image, choice):
+def main_wrapper(image):
     global opt
     status = ""  # 初始化状态信息
     images = []  # 初始化用于存储多张图像的列表
@@ -30,10 +30,10 @@ def main_wrapper(image, choice):
 
 
 parser = argparse.ArgumentParser(prog='test.py')
-parser.add_argument('--ocr_det_weights', nargs='+', type=str, default='./ckpt/best.pt', help='model.pt path(s)')
+parser.add_argument('--ocr_det_weights', nargs='+', type=str, default='./weights/epoch_000.pt', help='model.pt path(s)')
 parser.add_argument('--vague_det_weights', nargs='+', type=str, default='./ckpt/damage_detect.pth', help='model.pth path(s)')
 parser.add_argument('--vague_det_config', nargs='+', type=str, default='./ckpt/damage_detect.py', help='mmdetection config.py path(s)')
-parser.add_argument('--model_name_or_path', nargs='+', type=str, default='./ckpt/AutoHDR-Qwen2-7B', help='llm weight path(s)')
+parser.add_argument('--model_name_or_path', nargs='+', type=str, default='./ckpt/AutoHDR-Qwen2-1.5B', help='llm weight path(s)')
 
 parser.add_argument('--det-batch-size', type=int, default=1, help='size of each image batch')
 parser.add_argument('--reg-batch-size', type=int, default=36, help='size of each image batch')
@@ -115,14 +115,29 @@ body { display: flex; flex-direction: column; align-items: center; }
 # )
 
 # Gradio 界面
+
+    
 with gr.Blocks() as demo:
 
-    top_image = gr.Image(value="古籍修复demo.png", label="顶部图片", show_download_button=False, show_label=False, container=False,)
+    top_image = gr.Image(value="images/logo.png", label="顶部图片", show_download_button=False, show_label=False, container=False,)
+    
+
     
     # 输入图像和选择框
     image_input = gr.Image(type="pil", label="输入图像")
-    choice_input = gr.Radio(choices=["古籍"], label="选择功能(黑底白字的图片请选择房山石经，其余情况选择古籍)", value="古籍")
-
+    # 添加示例
+    gr.Examples(
+        examples=[
+            ["images/FS_12_138_2.jpg"],
+            ["images/FS_12_159_2.jpg"],
+            ["images/FS_15_481_1.jpg"],
+            ["images/FS_20_361_2.jpg"],
+            ["images/FS_25_162_1.jpg"],
+        ],
+        inputs=image_input,
+        label="example"
+    )
+    
     # 按钮
     submit_button = gr.Button("提交")
 
@@ -135,7 +150,7 @@ with gr.Blocks() as demo:
     # 按钮点击后，调用 main_wrapper 函数
     submit_button.click(
         fn=main_wrapper,  # 点击按钮时调用的函数
-        inputs=[image_input, choice_input],  # 函数的输入
+        inputs=[image_input],  # 函数的输入
         outputs=[status_output, image_output],  # 函数的输出
     )
 

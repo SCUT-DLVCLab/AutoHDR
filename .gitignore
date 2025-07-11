@@ -21,3 +21,4 @@ unet/
 AutoHDR-Qwen2-7B/
 *.ttf
 ckpt/
+weights/
