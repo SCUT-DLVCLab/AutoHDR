@@ -22,3 +22,16 @@ AutoHDR-Qwen2-7B/
 *.ttf
 ckpt/
 weights/
+build/
+dist/
+demo_utils/
+*.spec
+*.sh
+det2base64.py
+det_model_template.py
+det_model.py
+gratest.py
+reg_model_template.py
+reg_model.py
+reg2base64.py
+test_det.py
