@@ -119,7 +119,7 @@ def main(data, opt):
         os.makedirs(combined_dir)
 
 
-    yield "加载模型...", None
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   
     # 加载破损检测模型 dino
     model_det_vague = init_detector(opt.vague_det_config, opt.vague_det_weights, device=device)
