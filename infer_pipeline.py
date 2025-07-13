@@ -95,8 +95,6 @@ def detect(
 
 def main(data, opt):
 
-    yield "开始修复...", None
-
     data_path_api = 'api_test.png'
     data.save(data_path_api)
     data = data_path_api
@@ -119,7 +117,6 @@ def main(data, opt):
         os.makedirs(combined_dir)
 
 
-    yield "加载模型...", None
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   
     # 加载破损检测模型 dino
     model_det_vague = init_detector(opt.vague_det_config, opt.vague_det_weights, device=device)
@@ -128,12 +125,11 @@ def main(data, opt):
     det_model = attempt_load(opt.ocr_det_weights, map_location=device)
     reg_model = vit_base_im96_patch8(num_classes=31524)
     reg_model = torch.nn.DataParallel(reg_model).to(device)
-    # reg_model.load_state_dict(torch.load('ckpt/ocr_reg.pth')['state_dict'])
-    reg_model.load_state_dict(torch.load('./epoch79.pth')['state_dict'])
+    reg_model.load_state_dict(torch.load('ckpt/ocr_reg.pth')['state_dict'])
 
     #img = Image.open(data).convert('RGB')
     #img = data if isinstance(data, Image.Image) else Image.open(data).convert('RGB')
-    yield "OSTU二值化...", None
+
 
     img = Image.open(data).convert('RGB')
     img_invert = invert_image(img)
@@ -142,9 +138,9 @@ def main(data, opt):
     img_invert_gray = Image.open(img_invert_path).convert('L').convert('RGB')
 
     print('detecting...')
-    yield "OCR检测...", None
+
     ##### 这里是破损检测模型
-    # 破损检测模型是灰度输入的
+
     results = inference_detector(model_det_vague, np.array(img_invert_gray))
     # 获取预测框、分数和标签
     boxes = results.pred_instances.bboxes.cpu().numpy()
@@ -176,7 +172,6 @@ def main(data, opt):
     im = cv2.imread(img_invert_path, 0)
 
     print('recognizing...')
-    yield "OCR识别...", None    
 
     # 这里首先对OCR检测框进行识别
     char_ims = []
@@ -192,16 +187,6 @@ def main(data, opt):
         x1, y1, x2, y2 = [round(float(k)) for k in line]
         char_ims.append(im[y1:y2, x1:x2])
     vague_output_chars, vague_output_probs = batch_char_recog(reg_model, device, char_dict, char_ims, bs=opt.reg_batch_size)
-
-    # # 这一步只在OCR检测不准的时候用
-    # chars = {}
-    # to_remove_detect_result = set()
-    # for idx, (char, prob) in enumerate(zip(output_chars, output_probs)):
-    #     chars[idx] = char[0]
-    #     # 如果prob[0]小于0.2，则认为这里没有字符，删除detect_result中对应的结果
-    #     if prob[0] < 0.7:
-    #         # 找到对应的detect_result中的结果
-    #         to_remove_detect_result.add(idx)
 
     # 坐标作为key 字符和置信度作为value 后面要用
     OCR_result = {}
@@ -224,7 +209,6 @@ def main(data, opt):
                 to_remove.add(idx)
     
     print('arrange...')
-    yield "处理阅读顺序...", None
 
     # 创建一个新的结果列表来拼接 这个用来做阅读顺序的，只是一个list
     final_results = []
@@ -288,12 +272,9 @@ def main(data, opt):
     print(f'识别字符：【{num_ocr}】个，识别破损位置：【{num_degraded}】个')
     char_str = ''.join(chars_list)
     
-    yield f'识别字符：【{num_ocr}】个，识别破损位置：【{num_degraded}】个', None
-    yield 'OCR识别结果...', None
  
     char_str = convert(char_str, 'zh-cn')
     char_str = cc.convert(char_str)
-    yield char_str, None
 
     del model_det_vague
     del det_model
@@ -302,7 +283,6 @@ def main(data, opt):
     torch.cuda.empty_cache()
 
     print('predicting...')
-    yield "预测缺失文本...", None
     model_name_or_path = opt.model_name_or_path
     model, tokenizer = model_init(model_name_or_path)
 
@@ -423,11 +403,9 @@ def main(data, opt):
                     # print(f"出现多token 解码失败的情况")
                     # import pdb; pdb.set_trace()
 
-    yield '缺失内容预测结果...', None
-    yield str(output_matches), None
 
     print('开始加载修复模型')
-    yield "加载修复模型...", None
+
     del model
     del tokenizer
     torch.cuda.empty_cache()
@@ -441,7 +419,6 @@ def main(data, opt):
     generator = torch.Generator(device=pipeline.device).manual_seed(opt.seed)
 
     print('开始切patches')
-    yield "根据破损字符位置对图像切块...", None
 
     patch_size = 448
     stride = 224
@@ -580,14 +557,12 @@ def main(data, opt):
                     patches.append((patch, patch_info))
     # print(f'img{i} success, patch num: {len(patches)}')
     print(f'共有{len(patches)}个patch')
-    yield f'共有{len(patches)}个patch', None
-    # import pdb; pdb.set_trace()
+
 
     print_i = 0
     for patch in tqdm(patches):
         
         print_i += 1
-        yield f"正在修复第{print_i}个patch...", None
         # 图像块的左上角和右下角坐标
         xmin, ymin, xmax, ymax = patch[1]['position']
         # degraded_image = patch[0]
@@ -704,18 +679,13 @@ def main(data, opt):
             if count < area_threshold:
                 final_mask[labeled_holes == label_idx] = 255
     
-        # # 转换回PIL Image
-        # cv2.imwrite('a.png', connected_mask)
-        # mask_image = Image.fromarray(final_mask)
-        # mask_image.save('a1.png')
-        # import pdb; pdb.set_trace()
+
         degraded_array = np.array(degraded_image)
         mask_array = np.array(final_mask)
         mask_3channel = np.stack([mask_array] * 3, axis=2)
         result_array = np.where(mask_3channel == 255, 255, degraded_array)
         degraded_image = Image.fromarray(result_array)
-        # cv2.imwrite('a.jpg', final_mask)
-        # import pdb; pdb.set_trace()
+
     
 
         repair_image_dict['content_image'] = content_image
@@ -756,14 +726,11 @@ def main(data, opt):
 
         image = image.resize((patch_size, patch_size), Image.Resampling.LANCZOS)
         img_invert.paste(image, patch[1]['position'])
-        # if print_i % 5 == 0:
-        #     img_invert.save('patched_image_repaired_1.png')
-        # import pdb; pdb.set_trace()
+
     restore_img = restore_image(img_invert)
     combined = concatenate_images_vertical(restore_img, img)
-    print(data)
-    # restore_img.save('restored_image.png')
-    # combined.save('combined_image_1.png')
+
+
 
     if restore_img is not None:
         restore_img.save(os.path.join(f'{save_path}/img', 'tmp.jpg'))
@@ -773,55 +740,9 @@ def main(data, opt):
     del unet
     del generator
     torch.cuda.empty_cache()
-    # import pdb; pdb.set_trace()
-#    yield "修复完成",restore_img
 
-###标识
 
-    yield "正在标识结果...", None
-    image_to_repair_mark = restore_img.copy()
-    draw = ImageDraw.Draw(image_to_repair_mark)
-
-    try:
-        font = ImageFont.truetype("demo_utils/font/KaiXinSongA.ttf", 20)  # 这里使用系统字体"宋体"
-    except IOError:
-        font = ImageFont.load_default() 
-
-    colors = ['blue', 'green', 'purple', 'orange', 'brown', 'cyan', 'magenta', 'yellow', 'pink', 'gray']
-
-    for idx,patch in tqdm(enumerate(patches)): 
-        #图像块坐标
-        xmin, ymin, xmax, ymax = patch[1]['position']
-        color = colors[idx % len(colors)]
-        # 绘制边框
-        draw.rectangle([xmin, ymin, xmax, ymax], outline=color, width=2)
-        label = f"Patch {idx+1} ({patch_size}x{patch_size})"
-        draw.text((xmin, ymin), label, fill=color, font=font)
-        #处理修复字符
-        for bbox_name in patch[1]['intersect_bboxes']:
-            bbox_info = extra_num_ocr_prob_dict[bbox_name]
-            bx_min, by_min, bw, bh = bbox_info['bbox']
-            bx_max = bx_min + bw; by_max = by_min + bh
-            
-            # # 确保坐标在patch范围内
-            # rel_x_min = max(0, int(bx_min - xmin))
-            # rel_y_min = max(0, int(by_min - ymin))
-            # rel_x_max = min(patch_size, int(bx_max - xmin))
-            # rel_y_max = min(patch_size, int(by_max - ymin))
-            
-            # 只有当有效区域大于0时才绘制
-            if rel_x_max > rel_x_min and rel_y_max > rel_y_min:
-                combined_mask[rel_y_min:rel_y_max, rel_x_min:rel_x_max] = 255      
-                #绘制字框
-                draw.rectangle([bx_min, by_min, bx_max, by_max], outline=colors[(idx+1) % len(colors)], width=2)
-                #绘制字
-                text = bbox_info['txt']
-                draw.text((bx_min, by_min), text, fill='red', font=font)
-    yield "标识完成",None
-    yield "标识完成",image_to_repair_mark
-    
-###
-    return "修复完成",image_to_repair_mark
+    return restore_img, combined
 
 if __name__ == '__main__':
 
