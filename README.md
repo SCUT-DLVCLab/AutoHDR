@@ -29,7 +29,8 @@
 - The modular design enables flexible adjustments, allowing AutoHDR to collaborate effectively with historians.
 
 ## 📅 News
-- **2025.07.09**: Release the inference code. Welcome to have a try!
+- **2025.07.13**: 🔥🎉 The 💻 [demo](http://121.41.49.212:8432/) is now live! Welcome to try it out!
+- **2025.07.09**: Release the inference code.
 - **2025.07.08**: Our [paper](https://arxiv.org/abs/2507.05108) is now available on arXiv.
 - **2025.05.15**: 🎉🎉 Our [paper](https://arxiv.org/abs/2507.05108) is accepted by ACL2025 main.
 
