@@ -12,8 +12,7 @@
 [![GitHub ZZXF11](https://img.shields.io/badge/GitHub-ZZXF11-blueviolet?logo=github)](https://github.com/ZZXF11)
 [![SCUT DLVC Lab](https://img.shields.io/badge/SCUT-DLVC_Lab-327FE6?logo=Academia&logoColor=white)](http://dlvc-lab.net/lianwen/)
 [![Code](https://img.shields.io/badge/Code-AutoHDR-yellow)](https://github.com/SCUT-DLVCLab/AutoHDR)
-
-<!-- [![Gradio demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-AutoHDR-ff7c00)](https://github.com/SCUT-DLVCLab/AutoHDR) -->
+[![Gradio demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-AutoHDR-ff7c00)](http://121.41.49.212:8432/)
 <!-- [![Homepage](https://img.shields.io/badge/Homepage-AutoHDR-green)]([https://](https://github.com/SCUT-DLVCLab/AutoHDR)) -->
 
 </div>
