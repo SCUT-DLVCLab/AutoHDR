@@ -95,9 +95,7 @@ def detect(
 
 def main(data, opt):
 
-    data_path_api = 'api_test.png'
-    data.save(data_path_api)
-    data = data_path_api
+
     opt.data = data
 
     if opt.seed is not None:
@@ -748,7 +746,7 @@ if __name__ == '__main__':
 
     config_file = './ckpt/damage_detect.py' # 网络模型py文件
     damage_detect_checkpoint_file = './ckpt/damage_detect.pth'  # 训练好的模型参数
-    model_name_or_path = './ckpt/AutoHDR-Qwen2-7B'
+    model_name_or_path = './ckpt/AutoHDR-Qwen2-1.5B'
     ocr_det_weights = './ckpt/best.pt'
 
     parser = argparse.ArgumentParser(prog='test.py')

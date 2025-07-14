@@ -24,7 +24,6 @@ ckpt/
 weights/
 build/
 dist/
-demo_utils/
 *.spec
 *.sh
 det2base64.py
