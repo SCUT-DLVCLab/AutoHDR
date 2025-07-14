@@ -83,7 +83,7 @@ Using AutoHDR for damaged historical documents repair:
 CUDA_VISIBLE_DEVICES=<gpu_id> python infer_pipeline.py
 ```
 
-## ☎️ Cotact
+## ☎️ Contact
 If you have any questions, feel free to contact [Yuyi Zhang](https://github.com/ZZXF11) at [yuyi.zhang11@foxmail.com](yuyi.zhang11@foxmail.com)
 
 ## 🌄 Gallery
