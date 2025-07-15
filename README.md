@@ -52,7 +52,8 @@
 
 
 ## 🚧 Installation
-### Prerequisites (Recommended)
+### Prerequisites
+- **Ubuntu 20.04**
 - Linux
 - Python 3.10
 - Pytorch 2.3.0
@@ -66,13 +67,17 @@ git clone https://github.com/SCUT-DLVCLab/AutoHDR.git
 
 **Step 0**: Download and install Miniconda from the [official website](https://docs.conda.io/en/latest/miniconda.html).
 
-**Step 1**: Create a conda environment and activate it.
+**Step 1**: Download all model files (except the OCR model) from the [Model Zoo](#-model-zoo) and put them in the `ckpt` folder.
+
+**Step 2**: Download the OCR model files from the [Model Zoo](#-model-zoo) and put them in the `dist` folder.
+
+**Step 3**: Create a conda environment and activate it.
 ```bash
 conda create -n autohdr python=3.10 -y
 conda activate autohdr
 ```
 
-**Step 2**: Install the required packages.
+**Step 4**: Install the required packages.
 ```bash
 pip install -r requirements.txt
 ```

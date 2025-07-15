@@ -1,39 +1,30 @@
 from mmdet.apis import init_detector, inference_detector
 import os
 import cv2
-
 import argparse
 import torch
 from tqdm import tqdm
-from torchvision import transforms
 from utils.datasets import create_dataloader
 from utils.general import check_img_size, non_max_suppression, scale_coords, colorstr
-from utils.torch_utils import select_device
-from models.experimental import attempt_load
 import os
 from utils.reader import get_sort
-from utils.recognition import batch_char_recog
-from utils.vit import vit_base_im96_patch8
+from utils.recognition import batch_char_recog_exe
 import cv2
 import numpy as np
-from transformers import AutoModelForCausalLM, AutoTokenizer
-# from peft import PeftModel, LoraConfig, get_peft_model
 import re
-import random
-import math
 import torchvision.transforms.functional as TF  # 导入transforms.functional
 import torch.nn.functional as F
 from diffusers import UNet2DModel
 from document.tools.build_HDR import build_pipeline
-from fontTools.ttLib import TTFont
-# from torchvision.transforms import functional as F
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 from transformers import set_seed
 from opencc import OpenCC
 from zhconv import convert
-from utils_pipeline import calculate_iou, xyxy2xywh, rank_probability_weighted_fusion, get_topk_multi_tokens, model_init, visualize_boxes, render_char_with_font_T, concatenate_images_vertical, render_char_with_font_L, is_char_in_font, invert_image, restore_image
-from scipy.ndimage import binary_dilation, binary_fill_holes
+from utils_pipeline import calculate_iou, xyxy2xywh, rank_probability_weighted_fusion, get_topk_multi_tokens, model_init, render_char_with_font_T, concatenate_images_vertical, invert_image, restore_image
+from scipy.ndimage import binary_fill_holes
 from scipy.ndimage import label as ndimage_label
+from utils.det_wrapper import det_model
+from utils.reg_wrapper import reg_model
 
 cc = OpenCC('s2t')
 ss = OpenCC('t2s')
@@ -42,7 +33,6 @@ ss = OpenCC('t2s')
 
 def detect(
          opt,
-         model,
          data,
          batch_size=32,
          imgsz=640,
@@ -53,20 +43,14 @@ def detect(
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-
-
     # Load model
-    gs = max(int(model.stride.max()), 32)
+    model = det_model('./dist/det_model/det_model')
+    gs=model(device,mode=1)
+
     imgsz = check_img_size(imgsz, s=gs)  # check img_size
 
     # Half
     half = device.type != 'cpu' and half_precision  # half precision only supported on CUDA
-    if half:
-        model.half()
-
-    # Configure
-    model.eval()
 
     # Dataloader
     dataloader = create_dataloader(data, imgsz, batch_size, gs, opt, pad=0.5, rect=True,
@@ -79,7 +63,8 @@ def detect(
 
         with torch.no_grad():
             # Run model
-            out, train_out = model(img, augment=False)
+            #out, train_out = model(img, augment=False)
+            out = model(img, mode=2)
             # Run NMS
             out = non_max_suppression(out, conf_thres=conf_thres, iou_thres=iou_thres, labels=[], multi_label=True)
 
@@ -90,11 +75,11 @@ def detect(
             scale_coords(img[si].shape[1:], predn[:, :4], shapes[si][0], shapes[si][1])  # native-space pred
             res = predn[:, :5].cpu().numpy().astype(float).tolist()
             res_dic[paths[si]] = res
+    model.cleanup()
 
     return res_dic
 
 def main(data, opt):
-
 
     opt.data = data
 
@@ -120,14 +105,6 @@ def main(data, opt):
     model_det_vague = init_detector(opt.vague_det_config, opt.vague_det_weights, device=device)
     dicp = 'ckpt/dic_31524.txt'
     char_dict = open(dicp, encoding='utf-8').read().splitlines()
-    det_model = attempt_load(opt.ocr_det_weights, map_location=device)
-    reg_model = vit_base_im96_patch8(num_classes=31524)
-    reg_model = torch.nn.DataParallel(reg_model).to(device)
-    reg_model.load_state_dict(torch.load('ckpt/ocr_reg.pth')['state_dict'])
-
-    #img = Image.open(data).convert('RGB')
-    #img = data if isinstance(data, Image.Image) else Image.open(data).convert('RGB')
-
 
     img = Image.open(data).convert('RGB')
     img_invert = invert_image(img)
@@ -138,7 +115,6 @@ def main(data, opt):
     print('detecting...')
 
     ##### 这里是破损检测模型
-
     results = inference_detector(model_det_vague, np.array(img_invert_gray))
     # 获取预测框、分数和标签
     boxes = results.pred_instances.bboxes.cpu().numpy()
@@ -154,7 +130,6 @@ def main(data, opt):
     ##### 这里是ocr检测模型
     # 是RGB输入的
     res_dic = detect(opt,
-                        det_model,
                         img_invert_path,
                         opt.det_batch_size,
                         opt.img_size,
@@ -177,16 +152,18 @@ def main(data, opt):
         x1, y1, x2, y2 = [round(float(k)) for k in line]
         char_ims.append(im[y1:y2, x1:x2])
 
-    output_chars, output_probs = batch_char_recog(reg_model, device, char_dict, char_ims, bs=opt.reg_batch_size)
+    model = reg_model('./dist/reg_model')
+    model.start()
+    output_chars, output_probs = batch_char_recog_exe(model,device, char_dict, char_ims, bs=opt.reg_batch_size)
 
     # 破损检测框中的字也需要被识别
     char_ims = []
     for line in vague_det_bbox:
         x1, y1, x2, y2 = [round(float(k)) for k in line]
         char_ims.append(im[y1:y2, x1:x2])
-    vague_output_chars, vague_output_probs = batch_char_recog(reg_model, device, char_dict, char_ims, bs=opt.reg_batch_size)
+    vague_output_chars, vague_output_probs = batch_char_recog_exe(model,device, char_dict, char_ims, bs=opt.reg_batch_size)
+    model.cleanup()
 
-    # 坐标作为key 字符和置信度作为value 后面要用
     OCR_result = {}
     for idx, (char, prob, detect_box) in enumerate(zip(output_chars, output_probs, ocr_det_bbox)):
         OCR_result[str(detect_box)] = (char, prob)
@@ -263,7 +240,6 @@ def main(data, opt):
             import pdb; pdb.set_trace()
     
     if num_degraded > 270:
-        return None, None
         raise ValueError('Too many degraded characters')
 
 
@@ -274,9 +250,9 @@ def main(data, opt):
     char_str = convert(char_str, 'zh-cn')
     char_str = cc.convert(char_str)
 
+
     del model_det_vague
-    del det_model
-    del reg_model
+
 
     torch.cuda.empty_cache()
 
@@ -400,6 +376,7 @@ def main(data, opt):
                     extra_num_ocr_prob_dict[key]['flag'] = False
                     # print(f"出现多token 解码失败的情况")
                     # import pdb; pdb.set_trace()
+
 
 
     print('开始加载修复模型')
@@ -553,7 +530,7 @@ def main(data, opt):
                         'intersect_bboxes': intersect_bboxes
                     }
                     patches.append((patch, patch_info))
-    # print(f'img{i} success, patch num: {len(patches)}')
+
     print(f'共有{len(patches)}个patch')
 
 
@@ -561,6 +538,7 @@ def main(data, opt):
     for patch in tqdm(patches):
         
         print_i += 1
+
         # 图像块的左上角和右下角坐标
         xmin, ymin, xmax, ymax = patch[1]['position']
         # degraded_image = patch[0]
@@ -590,8 +568,7 @@ def main(data, opt):
             # 绘制单字框的mask
             mask = Image.new('L', (rel_x_max - rel_x_min, rel_y_max - rel_y_min), 255)
             mask_image.paste(mask, (rel_x_min, rel_y_min, rel_x_max, rel_y_max))
-            # degraded_image.paste(mask, (rel_x_min, rel_y_min, rel_x_max, rel_y_max)) # 考虑要不要inpainting修复
-            # import pdb; pdb.set_trace()
+
             # 渲染单字图片
             single_char_img = render_char_with_font_T(bbox_info['txt'])
             # 将单字图片resize成box的大小
@@ -677,6 +654,7 @@ def main(data, opt):
             if count < area_threshold:
                 final_mask[labeled_holes == label_idx] = 255
     
+        # # 转换回PIL Image
 
         degraded_array = np.array(degraded_image)
         mask_array = np.array(final_mask)
@@ -684,6 +662,7 @@ def main(data, opt):
         result_array = np.where(mask_3channel == 255, 255, degraded_array)
         degraded_image = Image.fromarray(result_array)
 
+        # import pdb; pdb.set_trace()
     
 
         repair_image_dict['content_image'] = content_image
@@ -727,7 +706,7 @@ def main(data, opt):
 
     restore_img = restore_image(img_invert)
     combined = concatenate_images_vertical(restore_img, img)
-
+    print(data)
 
 
     if restore_img is not None:
@@ -739,14 +718,13 @@ def main(data, opt):
     del generator
     torch.cuda.empty_cache()
 
-
     return restore_img, combined
 
 if __name__ == '__main__':
 
     config_file = './ckpt/damage_detect.py' # 网络模型py文件
     damage_detect_checkpoint_file = './ckpt/damage_detect.pth'  # 训练好的模型参数
-    model_name_or_path = './ckpt/AutoHDR-Qwen2-1.5B'
+    model_name_or_path = './ckpt/AutoHDR-Qwen2-7B'
     ocr_det_weights = './ckpt/best.pt'
 
     parser = argparse.ArgumentParser(prog='test.py')
