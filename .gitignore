@@ -19,7 +19,6 @@ local_output*
 *.pt
 unet/
 AutoHDR-Qwen2-7B/
-*.ttf
 ckpt/
 weights/
 build/
