@@ -1,48 +1,36 @@
 from mmdet.apis import init_detector, inference_detector
 import os
 import cv2
-
 import argparse
 import torch
 from tqdm import tqdm
-from torchvision import transforms
 from utils.datasets import create_dataloader
 from utils.general import check_img_size, non_max_suppression, scale_coords, colorstr
-from utils.torch_utils import select_device
-from models.experimental import attempt_load
 import os
 from utils.reader import get_sort
-from utils.recognition import batch_char_recog
-from utils.vit import vit_base_im96_patch8
+from utils.recognition import batch_char_recog_exe
 import cv2
 import numpy as np
-from transformers import AutoModelForCausalLM, AutoTokenizer
-# from peft import PeftModel, LoraConfig, get_peft_model
 import re
-import random
-import math
-import torchvision.transforms.functional as TF  # 导入transforms.functional
+import torchvision.transforms.functional as TF
 import torch.nn.functional as F
 from diffusers import UNet2DModel
 from document.tools.build_HDR import build_pipeline
-from fontTools.ttLib import TTFont
-# from torchvision.transforms import functional as F
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 from transformers import set_seed
 from opencc import OpenCC
 from zhconv import convert
 from utils_pipeline import calculate_iou, xyxy2xywh, rank_probability_weighted_fusion, get_topk_multi_tokens, model_init, visualize_boxes, render_char_with_font_T, concatenate_images_vertical, render_char_with_font_L, is_char_in_font, invert_image, restore_image
 from scipy.ndimage import binary_dilation, binary_fill_holes
 from scipy.ndimage import label as ndimage_label
+from utils.det_wrapper import det_model
+from utils.reg_wrapper import reg_model
 
 cc = OpenCC('s2t')
 ss = OpenCC('t2s')
 
-
-
 def detect(
          opt,
-         model,
          data,
          batch_size=32,
          imgsz=640,
@@ -53,22 +41,14 @@ def detect(
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-
-
     # Load model
-    gs = max(int(model.stride.max()), 32)
+    model = det_model('./dist/det_model/det_model')
+    gs=model(device,mode=1)
     imgsz = check_img_size(imgsz, s=gs)  # check img_size
 
     # Half
     half = device.type != 'cpu' and half_precision  # half precision only supported on CUDA
-    if half:
-        model.half()
 
-    # Configure
-    model.eval()
-
-    # Dataloader
     dataloader = create_dataloader(data, imgsz, batch_size, gs, opt, pad=0.5, rect=True,
                                     prefix=colorstr('val: '), infer=True)[0]
     
@@ -79,7 +59,8 @@ def detect(
 
         with torch.no_grad():
             # Run model
-            out, train_out = model(img, augment=False)
+            #out, train_out = model(img, augment=False)
+            out = model(img, mode=2)
             # Run NMS
             out = non_max_suppression(out, conf_thres=conf_thres, iou_thres=iou_thres, labels=[], multi_label=True)
 
@@ -90,7 +71,7 @@ def detect(
             scale_coords(img[si].shape[1:], predn[:, :4], shapes[si][0], shapes[si][1])  # native-space pred
             res = predn[:, :5].cpu().numpy().astype(float).tolist()
             res_dic[paths[si]] = res
-
+    model.cleanup()
     return res_dic
 
 def main(data, opt):
@@ -125,14 +106,6 @@ def main(data, opt):
     model_det_vague = init_detector(opt.vague_det_config, opt.vague_det_weights, device=device)
     dicp = 'ckpt/dic_31524.txt'
     char_dict = open(dicp, encoding='utf-8').read().splitlines()
-    det_model = attempt_load(opt.ocr_det_weights, map_location=device)
-    reg_model = vit_base_im96_patch8(num_classes=31524)
-    reg_model = torch.nn.DataParallel(reg_model).to(device)
-    # reg_model.load_state_dict(torch.load('ckpt/ocr_reg.pth')['state_dict'])
-    reg_model.load_state_dict(torch.load('./epoch79.pth')['state_dict'])
-
-    #img = Image.open(data).convert('RGB')
-    #img = data if isinstance(data, Image.Image) else Image.open(data).convert('RGB')
     yield "OSTU二值化...", None
 
     img = Image.open(data).convert('RGB')
@@ -143,14 +116,12 @@ def main(data, opt):
 
     print('detecting...')
     yield "OCR检测...", None
-    ##### 这里是破损检测模型
-    # 破损检测模型是灰度输入的
     results = inference_detector(model_det_vague, np.array(img_invert_gray))
-    # 获取预测框、分数和标签
+
     boxes = results.pred_instances.bboxes.cpu().numpy()
     scores = results.pred_instances.scores.cpu().numpy() 
     labels = results.pred_instances.labels.cpu().numpy()
-    # 处理每个检测框
+
     vague_det_bbox = []
     for box, score, label in zip(boxes, scores, labels):
         x1, y1, x2, y2 = map(lambda x: int(round(x)), box)
@@ -160,7 +131,6 @@ def main(data, opt):
     ##### 这里是ocr检测模型
     # 是RGB输入的
     res_dic = detect(opt,
-                        det_model,
                         img_invert_path,
                         opt.det_batch_size,
                         opt.img_size,
@@ -184,26 +154,17 @@ def main(data, opt):
         x1, y1, x2, y2 = [round(float(k)) for k in line]
         char_ims.append(im[y1:y2, x1:x2])
 
-    output_chars, output_probs = batch_char_recog(reg_model, device, char_dict, char_ims, bs=opt.reg_batch_size)
+    model = reg_model('./dist/reg_model')
+    model.start()
+    output_chars, output_probs = batch_char_recog_exe(model,device, char_dict, char_ims, bs=opt.reg_batch_size)
 
-    # 破损检测框中的字也需要被识别
     char_ims = []
     for line in vague_det_bbox:
         x1, y1, x2, y2 = [round(float(k)) for k in line]
         char_ims.append(im[y1:y2, x1:x2])
-    vague_output_chars, vague_output_probs = batch_char_recog(reg_model, device, char_dict, char_ims, bs=opt.reg_batch_size)
+    vague_output_chars, vague_output_probs = batch_char_recog_exe(model,device, char_dict, char_ims, bs=opt.reg_batch_size)
+    model.cleanup()
 
-    # # 这一步只在OCR检测不准的时候用
-    # chars = {}
-    # to_remove_detect_result = set()
-    # for idx, (char, prob) in enumerate(zip(output_chars, output_probs)):
-    #     chars[idx] = char[0]
-    #     # 如果prob[0]小于0.2，则认为这里没有字符，删除detect_result中对应的结果
-    #     if prob[0] < 0.7:
-    #         # 找到对应的detect_result中的结果
-    #         to_remove_detect_result.add(idx)
-
-    # 坐标作为key 字符和置信度作为value 后面要用
     OCR_result = {}
     for idx, (char, prob, detect_box) in enumerate(zip(output_chars, output_probs, ocr_det_bbox)):
         OCR_result[str(detect_box)] = (char, prob)
@@ -212,32 +173,26 @@ def main(data, opt):
     for idx, (char, prob, detect_box) in enumerate(zip(vague_output_chars, vague_output_probs, vague_det_bbox)):
         vague_OCR_result[str(detect_box)] = (char, prob)
 
-    # 上面删除了置信度低的识别结果和对应的检测框，现在要合并字符框和破损框
     to_remove = set()
     iou_threshold = 0.5
     for vague_box in vague_det_bbox:
         for idx, detect_box in enumerate(ocr_det_bbox):
             iou = calculate_iou(vague_box, detect_box)
-            # 如果IoU大于阈值，说明两者重合
             if iou >= iou_threshold:
-                # 重合的时候我只要破损检测框，没啥问题这一步
                 to_remove.add(idx)
     
     print('arrange...')
     yield "处理阅读顺序...", None
 
-    # 创建一个新的结果列表来拼接 这个用来做阅读顺序的，只是一个list
     final_results = []
-    # 添加degraded_removed_detect_result中的结果
     final_results.extend(vague_det_bbox)
 
-    # 添加未被删除的ocr_det_bbox中的结果
     detect_box_remove = []
     for idx, detect_box in enumerate(ocr_det_bbox):
         if idx not in to_remove:
-            detect_box_remove.append(detect_box) # debug可视化用的而已
+            detect_box_remove.append(detect_box) 
             final_results.append(detect_box)
-    # visualize_boxes('invert_tmp.jpg', vague_det_bbox, detect_box_remove)
+
     h, w = im.shape[:2]
     out_box_li = get_sort(final_results, h, w)
 
@@ -282,7 +237,6 @@ def main(data, opt):
     
     if num_degraded > 270:
         return None, None
-        raise ValueError('Too many degraded characters')
 
 
     print(f'识别字符：【{num_ocr}】个，识别破损位置：【{num_degraded}】个')
@@ -296,8 +250,7 @@ def main(data, opt):
     yield char_str, None
 
     del model_det_vague
-    del det_model
-    del reg_model
+#    del reg_model
 
     torch.cuda.empty_cache()
 
@@ -345,21 +298,21 @@ def main(data, opt):
         output_matches = re.findall(pattern, pred_text)
 
         pred_text_tokens = pred.cpu()
-        # 用于记录缺失字在输入序列中的位置
+
         special_token_positions_dict = {}
-        found_assistant_token = False # 用来寻找序列中 assistant\n 中的assistant
-        found_beagin_token = False # 用来寻找序列中 assistant\n 中的\n
-        input_tokens_length = 0 # 用于记录input序列的长度
+        found_assistant_token = False 
+        found_beagin_token = False 
+        input_tokens_length = 0 
 
         for idx, token_id in enumerate(pred_text_tokens):
             token = tokenizer.decode([token_id])
-            if token.startswith('assistant'): # 找到assistant
+            if token.startswith('assistant'): 
                 found_assistant_token = True
 
-            if not found_beagin_token: # 如果没有找到assistant\n 则表面还在遍历input序列
-                input_tokens_length += 1 # 一定要放在 查找 \n 之前，因为 \n 也算一个token
+            if not found_beagin_token: 
+                input_tokens_length += 1 
             
-            if token.startswith('\n') and found_assistant_token: # 找到assistant之后再找\n
+            if token.startswith('\n') and found_assistant_token: 
                 found_beagin_token = True
 
             if found_beagin_token and token.startswith('<|extra_') and token.endswith('|>'):
@@ -371,7 +324,6 @@ def main(data, opt):
                 token_id_list = []
                 scores_id_list = []
                 
-                # 有些字需要多个token来表示，所以这里要一直拿，直到拿到下一个token
                 while True:
                     if next_token.startswith('<|extra_') or next_token == '<|im_end|>':
                         break
@@ -379,7 +331,7 @@ def main(data, opt):
                     next_token = tokenizer.decode([pred_text_tokens[next_token_id+num_next_chartoken_count]])
                     token_id_list.append(idx + num_next_chartoken_count)
                     scores_id_list.append(idx + num_next_chartoken_count - input_tokens_length)
-                    # import pdb;pdb.set_trace()
+
                 if token not in special_token_positions_dict.keys():
                     special_token_positions_dict[token] = (scores_id_list, tokenizer.decode([pred_text_tokens[i] for i in token_id_list]))
 
@@ -392,7 +344,6 @@ def main(data, opt):
                     correct_count_top1_tl += 1
                     cor_cur_top1_tl += 1
 
-                # scores中间保存了预测出来的token的概率分布 只有assistant token后面的部分
                 if len(special_token_idx) == 1:
                     token_scores = scores[special_token_idx[0]]
                     topk_tokens = torch.topk(token_scores, k=top_k).indices
@@ -416,12 +367,11 @@ def main(data, opt):
                     extra_num_ocr_prob_dict[key]['llm_prob'] = token_scores
                     extra_num_ocr_prob_dict[key]['flag'] = False
                 except:
-                    # import pdb; pdb.set_trace()
+
                     best_char = extra_num_ocr_prob_dict[key]['alternatives'][0]
                     extra_num_ocr_prob_dict[key]['txt'] = best_char
                     extra_num_ocr_prob_dict[key]['flag'] = False
-                    # print(f"出现多token 解码失败的情况")
-                    # import pdb; pdb.set_trace()
+
 
     yield '缺失内容预测结果...', None
     yield str(output_matches), None
@@ -432,7 +382,6 @@ def main(data, opt):
     del tokenizer
     torch.cuda.empty_cache()
 
-    ############### 加载修复模型 ###################
     unet = UNet2DModel.from_pretrained(pretrained_model_name_or_path='ckpt/unet')
     unet = unet.to(device)
     pipeline = build_pipeline(
@@ -450,7 +399,6 @@ def main(data, opt):
     img_w, img_h = img_invert.size
     patches = []
 
-    # 创建用于可视化的图像副本
     vis_img = img_invert.copy()
     draw = ImageDraw.Draw(vis_img)
     patch_count = 0
@@ -458,24 +406,22 @@ def main(data, opt):
     count_while_debug = 0
     while True:
         count_while_debug += 1
-        # 检查是否还有未修复的字框
         unrepaired_exists = False
         for bbox_info in extra_num_ocr_prob_dict.values():
             if not bbox_info['flag']:
                 unrepaired_exists = True
                 break
         
-        if not unrepaired_exists:  # 所有字框都已修复
+        if not unrepaired_exists:  
             break
 
-        # 找到未修复字框的边界
         min_x = float('inf')
         min_y = float('inf')
         max_x = float('-inf')
         max_y = float('-inf')
 
         for bbox_name, bbox_info in extra_num_ocr_prob_dict.items():
-            if bbox_info['flag']:  # 跳过已修复的字框
+            if bbox_info['flag']: 
                 continue
             x, y, w, h = bbox_info['bbox']
             min_x = min(min_x, x)
@@ -483,7 +429,6 @@ def main(data, opt):
             max_x = max(max_x, x + w)
             max_y = max(max_y, y + h)
 
-        # 定义四个角落（不预先减去patch_size）
         corners = [
             ('left_top', (min_x, min_y)),
             ('left_bottom', (min_x, max_y)),
@@ -491,10 +436,8 @@ def main(data, opt):
             ('right_bottom', (max_x, max_y))
         ]
 
-        # 计算每个角落patch包含的未修复字框数量
         corner_counts = []
         for corner_name, (corner_x, corner_y) in corners:
-            # 根据角落位置计算实际的start位置
             if 'right' in corner_name:
                 start_x = min(max(0, corner_x - patch_size), img_w - patch_size)
             else:
@@ -508,10 +451,9 @@ def main(data, opt):
             end_x = min(start_x + patch_size, img_w)
             end_y = min(start_y + patch_size, img_h)
             
-            # 计算当前patch中未修复的字框数量
             count = 0
             for bbox_name, bbox_info in extra_num_ocr_prob_dict.items():
-                if bbox_info['flag']:  # 跳过已修复的字框
+                if bbox_info['flag']: 
                     continue
                 x, y, w, h = bbox_info['bbox']
                 if (x >= start_x and x + w <= end_x and 
@@ -519,11 +461,9 @@ def main(data, opt):
                     count += 1
             corner_counts.append((corner_name, start_x, start_y, count))
 
-        # 找到包含最少未修复字框的角落
-        corner_counts.sort(key=lambda x: x[3])  # 按未修复字框数量升序排序
+        corner_counts.sort(key=lambda x: x[3]) 
         best_corner_name, start_x, start_y, _ = corner_counts[0]
 
-        # 根据选择的角落决定滑动方向
         if best_corner_name == 'left_top':
             x_range = range(0, img_w, stride_x)
             y_range = range(0, img_h, stride_y)
@@ -533,20 +473,17 @@ def main(data, opt):
         elif best_corner_name == 'right_top':
             x_range = range(img_w - patch_size, -patch_size, -stride_x)
             y_range = range(0, img_h, stride_y)
-        else:  # right_bottom
+        else:  
             x_range = range(img_w - patch_size, -patch_size, -stride_x)
             y_range = range(img_h - patch_size, -patch_size, -stride_y)
 
-        # 从选定的角落开始滑动窗口
         for curr_x in x_range:
             for curr_y in y_range:
-                # 计算实际的patch位置
                 start_x = max(0, min(curr_x, img_w - patch_size))
                 start_y = max(0, min(curr_y, img_h - patch_size))
                 end_x = min(start_x + patch_size, img_w)
                 end_y = min(start_y + patch_size, img_h)
 
-                # 确保patch大小正确
                 if end_x - start_x != patch_size or end_y - start_y != patch_size:
                     if curr_x >= img_w - patch_size:
                         start_x = img_w - patch_size
@@ -555,11 +492,10 @@ def main(data, opt):
                         start_y = img_h - patch_size
                         end_y = img_h
 
-                # 检查当前patch中完整包含了哪些字框
                 contained_bboxes = []
                 intersect_bboxes = []
                 for bbox_name, bbox_info in extra_num_ocr_prob_dict.items():
-                    if bbox_info['flag']:  # 跳过已修复的字框
+                    if bbox_info['flag']: 
                         continue
                     x, y, w, h = bbox_info['bbox']
                     if (x >= start_x and x + w <= end_x and 
@@ -578,35 +514,27 @@ def main(data, opt):
                         'intersect_bboxes': intersect_bboxes
                     }
                     patches.append((patch, patch_info))
-    # print(f'img{i} success, patch num: {len(patches)}')
     print(f'共有{len(patches)}个patch')
     yield f'共有{len(patches)}个patch', None
-    # import pdb; pdb.set_trace()
 
     print_i = 0
     for patch in tqdm(patches):
         
         print_i += 1
         yield f"正在修复第{print_i}个patch...", None
-        # 图像块的左上角和右下角坐标
         xmin, ymin, xmax, ymax = patch[1]['position']
-        # degraded_image = patch[0]
         degraded_image = img_invert.crop((xmin, ymin, xmax, ymax))
 
-        # 创建mask和content img
         content_image = Image.new('L', (patch_size, patch_size), 255)
         mask_image = Image.new('L', (patch_size, patch_size), 0)
 
-        # 创建整个patch的mask
         combined_mask = np.zeros((patch_size, patch_size), dtype=np.uint8)
 
         repair_image_dict = {}
         for bbox_name in patch[1]['contained_bboxes']:
             bbox_info = extra_num_ocr_prob_dict[bbox_name]
-            # 单字框的左上角和右下角坐标
             bx_min, by_min, bw, bh = bbox_info['bbox']
             bx_max = bx_min + bw; by_max = by_min + bh
-            # 计算单字框在图像块中的相对坐标
             rel_x_min = int(bx_min - xmin)
             rel_y_min = int(by_min - ymin)
             rel_x_max = int(bx_max - xmin)
@@ -614,16 +542,10 @@ def main(data, opt):
 
             combined_mask[rel_y_min:rel_y_max, rel_x_min:rel_x_max] = 255
 
-            # 绘制单字框的mask
             mask = Image.new('L', (rel_x_max - rel_x_min, rel_y_max - rel_y_min), 255)
             mask_image.paste(mask, (rel_x_min, rel_y_min, rel_x_max, rel_y_max))
-            # degraded_image.paste(mask, (rel_x_min, rel_y_min, rel_x_max, rel_y_max)) # 考虑要不要inpainting修复
-            # import pdb; pdb.set_trace()
-            # 渲染单字图片
             single_char_img = render_char_with_font_T(bbox_info['txt'])
-            # 将单字图片resize成box的大小
             single_char_img = single_char_img.resize((rel_x_max - rel_x_min, rel_y_max - rel_y_min), Image.Resampling.LANCZOS)
-            # 将单字图片粘贴到content图片中
             content_image.paste(single_char_img, (rel_x_min, rel_y_min))
 
 
@@ -631,24 +553,20 @@ def main(data, opt):
             bbox_info = extra_num_ocr_prob_dict[bbox_name]
             bx_min, by_min, bw, bh = bbox_info['bbox']
             bx_max = bx_min + bw; by_max = by_min + bh
-            
-            # 确保坐标在patch范围内
+
             rel_x_min = max(0, int(bx_min - xmin))
             rel_y_min = max(0, int(by_min - ymin))
             rel_x_max = min(patch_size, int(bx_max - xmin))
             rel_y_max = min(patch_size, int(by_max - ymin))
-            
-            # 只有当有效区域大于0时才绘制
+
             if rel_x_max > rel_x_min and rel_y_max > rel_y_min:
                 combined_mask[rel_y_min:rel_y_max, rel_x_min:rel_x_max] = 255
-                
-                # 计算在原始字框中的相对位置
-                crop_x = max(0, xmin - bx_min)  # 如果字框超出patch左边界，需要裁剪
-                crop_y = max(0, ymin - by_min)  # 如果字框超出patch上边界，需要裁剪
+
+                crop_x = max(0, xmin - bx_min)  
+                crop_y = max(0, ymin - by_min)  
                 crop_w = rel_x_max - rel_x_min
                 crop_h = rel_y_max - rel_y_min
                 
-                # 创建裁剪后大小的mask
                 mask = Image.new('L', (crop_w, crop_h), 255)
                 mask_image.paste(mask, (rel_x_min, rel_y_min, rel_x_max, rel_y_max))
 
@@ -656,88 +574,71 @@ def main(data, opt):
         connected_mask = combined_mask.copy()
         height, width = combined_mask.shape
         
-        # 水平方向连接
         for y in range(height):
             white_regions = np.where(combined_mask[y, :] == 255)[0]
             if len(white_regions) > 1:
                 for i in range(len(white_regions)-1):
                     gap = white_regions[i+1] - white_regions[i]
-                    if 1 < gap < 20:  # 可以调整这个阈值，控制最大连接距离
+                    if 1 < gap < 20: 
                         connected_mask[y, white_regions[i]:white_regions[i+1]] = 255
         
-        # 垂直方向连接
+
         for x in range(width):
             white_regions = np.where(combined_mask[:, x] == 255)[0]
             if len(white_regions) > 1:
                 for i in range(len(white_regions)-1):
                     gap = white_regions[i+1] - white_regions[i]
-                    if 1 < gap < 20:  # 可以调整这个阈值，控制最大连接距离
+                    if 1 < gap < 20:  
                         connected_mask[white_regions[i]:white_regions[i+1], x] = 255
         filled_mask = binary_fill_holes(connected_mask).astype(np.uint8) * 255
 
-        # 找出填充区域（原mask和填充后mask的差异区域）
         holes = filled_mask - connected_mask
         
-        # 标记连通区域
         labeled_holes, num_features = ndimage_label(holes)
         
-        # 计算每个连通区域的大小
         unique_labels, counts = np.unique(labeled_holes, return_counts=True)
 
         bbox_areas = []
         for bbox_name in patch[1]['contained_bboxes']:
             bbox_info = extra_num_ocr_prob_dict[bbox_name]
-            bw, bh = bbox_info['bbox'][2], bbox_info['bbox'][3]  # 宽度和高度
+            bw, bh = bbox_info['bbox'][2], bbox_info['bbox'][3]
             bbox_areas.append(bw * bh)
         
         if bbox_areas:
             min_char_area = min(bbox_areas)
-            area_threshold = min_char_area * 0.8  # 设置为最小字符面积的50%
+            area_threshold = min_char_area * 0.8  
         else:
             area_threshold = 300
         
-        # 创建最终的mask
         final_mask = connected_mask.copy()
         
-        # 只填充小于阈值的区域
         for label_idx, count in zip(unique_labels[1:], counts[1:]):  # 跳过背景(label=0)
             if count < area_threshold:
                 final_mask[labeled_holes == label_idx] = 255
     
-        # # 转换回PIL Image
-        # cv2.imwrite('a.png', connected_mask)
-        # mask_image = Image.fromarray(final_mask)
-        # mask_image.save('a1.png')
-        # import pdb; pdb.set_trace()
         degraded_array = np.array(degraded_image)
         mask_array = np.array(final_mask)
         mask_3channel = np.stack([mask_array] * 3, axis=2)
         result_array = np.where(mask_3channel == 255, 255, degraded_array)
         degraded_image = Image.fromarray(result_array)
-        # cv2.imwrite('a.jpg', final_mask)
-        # import pdb; pdb.set_trace()
-    
 
         repair_image_dict['content_image'] = content_image
         repair_image_dict['mask_image'] = mask_image
         repair_image_dict['degraded_image'] = degraded_image
         repair_image_dict['patch_bbox'] = [xmin, ymin, xmax, ymax]
         repair_image_dict['patch_size'] = patch_size
-
-        
-        # 调整patch_image的大小为512x512        
+       
         degraded_image = degraded_image.resize((512, 512), Image.Resampling.LANCZOS)
         content_image = content_image.resize((512, 512), Image.Resampling.LANCZOS)
         mask_image = mask_image.resize((512, 512), Image.Resampling.LANCZOS)
 
-        # 转换成tensor
         degraded_image_tensor = TF.normalize(TF.to_tensor(degraded_image), [0.5], [0.5]).unsqueeze(0)
         mask_image_tensor = TF.normalize(TF.to_tensor(mask_image), [0.5], [0.5]).unsqueeze(0)
         content_image_tensor = TF.normalize(TF.to_tensor(content_image), [0.5], [0.5]).unsqueeze(0)
         degraded_image_tensor = degraded_image_tensor.to(device)
         mask_image_tensor = mask_image_tensor.to(device)
         content_image_tensor = content_image_tensor.to(device)
-        # 预测修复结果
+
         with torch.no_grad():
             image = pipeline(
                     degraded_image=degraded_image_tensor,
@@ -756,14 +657,9 @@ def main(data, opt):
 
         image = image.resize((patch_size, patch_size), Image.Resampling.LANCZOS)
         img_invert.paste(image, patch[1]['position'])
-        # if print_i % 5 == 0:
-        #     img_invert.save('patched_image_repaired_1.png')
-        # import pdb; pdb.set_trace()
     restore_img = restore_image(img_invert)
     combined = concatenate_images_vertical(restore_img, img)
     print(data)
-    # restore_img.save('restored_image.png')
-    # combined.save('combined_image_1.png')
 
     if restore_img is not None:
         restore_img.save(os.path.join(f'{save_path}/img', 'tmp.jpg'))
@@ -776,51 +672,6 @@ def main(data, opt):
     # import pdb; pdb.set_trace()
     yield "修复完成",restore_img
 
-# ###标识
-
-#     yield "正在标识结果...", None
-#     image_to_repair_mark = restore_img.copy()
-#     draw = ImageDraw.Draw(image_to_repair_mark)
-
-#     try:
-#         font = ImageFont.truetype("demo_utils/font/KaiXinSongA.ttf", 20)  # 这里使用系统字体"宋体"
-#     except IOError:
-#         font = ImageFont.load_default() 
-
-#     colors = ['blue', 'green', 'purple', 'orange', 'brown', 'cyan', 'magenta', 'yellow', 'pink', 'gray']
-
-#     for idx,patch in tqdm(enumerate(patches)): 
-#         #图像块坐标
-#         xmin, ymin, xmax, ymax = patch[1]['position']
-#         color = colors[idx % len(colors)]
-#         # 绘制边框
-#         draw.rectangle([xmin, ymin, xmax, ymax], outline=color, width=2)
-#         label = f"Patch {idx+1} ({patch_size}x{patch_size})"
-#         draw.text((xmin, ymin), label, fill=color, font=font)
-#         #处理修复字符
-#         for bbox_name in patch[1]['intersect_bboxes']:
-#             bbox_info = extra_num_ocr_prob_dict[bbox_name]
-#             bx_min, by_min, bw, bh = bbox_info['bbox']
-#             bx_max = bx_min + bw; by_max = by_min + bh
-            
-#             # # 确保坐标在patch范围内
-#             # rel_x_min = max(0, int(bx_min - xmin))
-#             # rel_y_min = max(0, int(by_min - ymin))
-#             # rel_x_max = min(patch_size, int(bx_max - xmin))
-#             # rel_y_max = min(patch_size, int(by_max - ymin))
-            
-#             # 只有当有效区域大于0时才绘制
-#             if rel_x_max > rel_x_min and rel_y_max > rel_y_min:
-#                 combined_mask[rel_y_min:rel_y_max, rel_x_min:rel_x_max] = 255      
-#                 #绘制字框
-#                 draw.rectangle([bx_min, by_min, bx_max, by_max], outline=colors[(idx+1) % len(colors)], width=2)
-#                 #绘制字
-#                 text = bbox_info['txt']
-#                 draw.text((bx_min, by_min), text, fill='red', font=font)
-#     yield "标识完成",None
-#     yield "标识完成",image_to_repair_mark
-    
-# ###
     return "修复完成",restore_img
 
 if __name__ == '__main__':

@@ -1,33 +1,22 @@
 import gradio as gr
-from PIL import Image
-import infer_pipeline as pipline_qwen_multisptk_api
+import infer_pipeline_api as pipline_qwen_multisptk_api
 import argparse
 
 
-# def main_wrapper(image, choice):
-#     # 由于 opt 已经在全局范围内解析，我们可以直接使用它
-#     global opt
-#     if choice == '古籍':
-#         yield from pipline_qwen_multisptk_api.main(image, opt)
-#     else:
-#         yield from pipline_qwen_multisptk_fssj_api.main(image, opt)
-
 def main_wrapper(image):
     global opt
-    status = ""  # 初始化状态信息
-    images = []  # 初始化用于存储多张图像的列表
+    status = ""  
+    images = []  
 
-        # 逐步获取处理结果，并更新状态和图像
     for status_update, new_image in pipline_qwen_multisptk_api.main(image, opt):
-        status += status_update + "\n\n"  # 累积状态信息            
-        if not images == [] or new_image is not None:  # 如果有新的图像生成
-            if new_image is not None:  # 如果有新的图像生成
-                    images.append(new_image)  # 将新图像添加到图像列表
-            yield status, images  # 返回累积的状态和图像列表
+        status += status_update + "\n\n"           
+        if not images == [] or new_image is not None:  
+            if new_image is not None:  
+                    images.append(new_image)  
+            yield status, images 
         else:
             yield status, None
-        yield status, images  # 最终返回完整的状态和所有生成的图像
-
+        yield status, images 
 
 parser = argparse.ArgumentParser(prog='test.py')
 parser.add_argument('--ocr_det_weights', nargs='+', type=str, default='./weights/epoch_000.pt', help='model.pt path(s)')
@@ -77,55 +66,17 @@ opt = parser.parse_args()
 
 
 
-
 css = """
 body { display: flex; flex-direction: column; align-items: center; }
 .component { margin: 10px 0; }
 """
 
-# intro_markdown = "![Header Image](http://example.com/path/to/image.jpg)"
-
-# # 创建 Gradio 接口，输入和输出都为图片
-# demo = gr.Interface(
-#     fn=main_wrapper,  # 处理图片的函数
-#     inputs=[gr.Image(type="pil", label="输入图像"), 
-#             gr.Radio(choices=["古籍", "房山石经"], label="选择功能", value="古籍")
-#             ],  # 输入是图片和滑块
-#     outputs=[
-#         gr.Image(type="pil", label="修复区域识别结果"),
-#         gr.Textbox(label="修复信息"),
-#         gr.Textbox(label="统计信息"),
-#         gr.Textbox(label="OCR结果"),
-#         gr.Textbox(label="缺失内容预测结果"),
-#         gr.Image(type="pil", label="修复后的图像"),
-#         gr.Image(type="pil", label="修复位置标记"),
-#     ],
-#     # layout="vertical"
-#     css=css,
-# )
-
-# demo = gr.Interface(
-#     fn=main_wrapper,
-#     inputs=[gr.Image(type="pil", label="输入图像"), 
-#             gr.Radio(choices=["古籍", "房山石经"], label="选择功能", value="古籍")
-#             ],  # 输入是图片和滑块
-#     outputs=[gr.Textbox(label="处理状态"), gr.Image(label="处理图像")],
-#     live=True,
-#     queue=True
-# )
-
-# Gradio 界面
-
     
 with gr.Blocks() as demo:
 
     top_image = gr.Image(value="images/logo.png", label="顶部图片", show_download_button=False, show_label=False, container=False,)
-    
-
-    
-    # 输入图像和选择框
     image_input = gr.Image(type="pil", label="输入图像")
-    # 添加示例
+
     gr.Examples(
         examples=[
             ["images/FS_12_138_2.jpg"],
@@ -137,21 +88,15 @@ with gr.Blocks() as demo:
         inputs=image_input,
         label="example"
     )
-    
-    # 按钮
-    submit_button = gr.Button("提交")
 
-    # 输出框：处理状态和处理后的图像
+    submit_button = gr.Button("提交")
     status_output = gr.Textbox(label="处理状态")
     image_output = gr.Gallery(label="图像输出")
 
-    
-
-    # 按钮点击后，调用 main_wrapper 函数
     submit_button.click(
-        fn=main_wrapper,  # 点击按钮时调用的函数
-        inputs=[image_input],  # 函数的输入
-        outputs=[status_output, image_output],  # 函数的输出
+        fn=main_wrapper,  
+        inputs=[image_input], 
+        outputs=[status_output, image_output], 
     )
 
 
