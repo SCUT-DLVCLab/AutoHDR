@@ -42,7 +42,7 @@
 
 
 ## 🔥 Model Zoo
-| **Model**                                    | **chekcpoint** | **status** |
+| **Model**                                    | **Checkpoint** | **Status** |
 |----------------------------------------------|----------------|------------|
 | **AutoHDR-Qwen2-1.5B**                   | [BaiduYun:W2wq](https://pan.baidu.com/s/1j_HmyNDG0dOD6TyBHvqYwQ?pwd=W2wq) | Released  |
 | **AutoHDR-Qwen2-7B**                     | [BaiduYun:6o84](https://pan.baidu.com/s/1CUREGQIBoed1BgHjELguTQ?pwd=6o84) | Released  |
