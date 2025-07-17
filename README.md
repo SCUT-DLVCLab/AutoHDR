@@ -22,7 +22,7 @@
 ![Vis_1](images/pipeline.png)
 - FPHDR dataset
 ![Vis_2](images/example.png)
-- We propose a novel fully Automated solution for HDR **(AutoHDR)** , inspired by mirroring the workflow of expert historians.
+- We propose a novel fully Automated solution for HDR **(AutoHDR)**, inspired by mirroring the workflow of expert historians.
 - We introduce a pioneer Full-Page HDR dataset **(FPHDR)**, which supports comprehensive HDR model training and evaluation. 
 - Extensive experiments demonstrate the superior performance of our method on both text and appearance restoration.
 - The modular design enables flexible adjustments, allowing AutoHDR to collaborate effectively with historians.
@@ -57,7 +57,7 @@
 
 ## 🚧 Installation
 ### Prerequisites
-- **Ubuntu 20.04**
+- **Ubuntu 20.04** (required)
 - Linux
 - Python 3.10
 - Pytorch 2.3.0
@@ -71,19 +71,26 @@ git clone https://github.com/SCUT-DLVCLab/AutoHDR.git
 
 **Step 0**: Download and install Miniconda from the [official website](https://docs.conda.io/en/latest/miniconda.html).
 
-**Step 1**: Download all model files (except the OCR model) from the [Model Zoo](#-model-zoo) and put them in the `ckpt` folder.
-
-**Step 2**: Download the OCR model files from the [Model Zoo](#-model-zoo), unzip the package, and move the extracted files into the `dist` folder.
-
-**Step 3**: Create a conda environment and activate it.
+**Step 1**: Create a conda environment and activate it.
 ```bash
 conda create -n autohdr python=3.10 -y
 conda activate autohdr
 ```
 
-**Step 4**: Install the required packages.
+**Step 2**: Install the required packages.
 ```bash
 pip install -r requirements.txt
+```
+
+## 📺 Inference
+
+**Step 0**: Download all model files (except the OCR model) from the [Model Zoo](#-model-zoo) and put them in the `ckpt` folder.
+
+**Step 1**: Download the OCR model files from the [Model Zoo](#-model-zoo), unzip the package, and move the extracted files into the `dist` folder.
+
+**Step 2**: Using AutoHDR for damaged historical documents Restoration:
+```bash
+CUDA_VISIBLE_DEVICES=<gpu_id> python infer_pipeline.py
 ```
 
 ## 🚀 RUN WebUI
@@ -101,11 +108,6 @@ example:
 ![Vis_3](images/demo.png)
 
 
-## 📺 Inference
-Using AutoHDR for damaged historical documents repair:
-```bash
-CUDA_VISIBLE_DEVICES=<gpu_id> python infer_pipeline.py
-```
 
 ## ☎️ Contact
 If you have any questions, feel free to contact [Yuyi Zhang](https://github.com/ZZXF11) at [yuyi.zhang11@foxmail.com](yuyi.zhang11@foxmail.com)
