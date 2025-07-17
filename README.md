@@ -28,6 +28,7 @@
 - The modular design enables flexible adjustments, allowing AutoHDR to collaborate effectively with historians.
 
 ## 📅 News
+- **2025.07.17**: 🚀 The pretrained [model](#-model-zoo) has been released!
 - **2025.07.13**: 🔥🎉 The 💻 [demo](http://121.41.49.212:8432/) is now live! Welcome to try it out!
 - **2025.07.09**: Release the inference code.
 - **2025.07.08**: Our [paper](https://arxiv.org/abs/2507.05108) is now available on arXiv.
@@ -37,8 +38,10 @@
 
 - [x] Release inference code
 - [x] Release pretrained model
+- [x] Release a [WebUI](http://121.41.49.212:8432/)
+- [x] Upload pretrained model to Hugging Face
 - [ ] Release dataset
-- [ ] Release a WebUI
+
 
 
 ## 🔥 Model Zoo
@@ -46,9 +49,9 @@
 |----------------------------------------------|----------------|------------|
 | **AutoHDR-Qwen2-1.5B**                   | [BaiduYun:W2wq](https://pan.baidu.com/s/1j_HmyNDG0dOD6TyBHvqYwQ?pwd=W2wq) | Released  |
 | **AutoHDR-Qwen2-7B**                     | [BaiduYun:6o84](https://pan.baidu.com/s/1CUREGQIBoed1BgHjELguTQ?pwd=6o84) | Released  |
-| **DiffHDR**                              | [BaiduYun:63a3](https://pan.baidu.com/s/1fSKd5uQsiKp2uPQBdKtC3Q?pwd=63a3) | Released  |
+| **DiffHDR**         | [BaiduYun:63a3](https://pan.baidu.com/s/1fSKd5uQsiKp2uPQBdKtC3Q?pwd=63a3) | Released  |
 | **Damage Localization Model**            | [BaiduYun:2QC7](https://pan.baidu.com/s/1wGcT6Ktzqg_bOyc8NsV4Ig?pwd=2QC7) | Released  |
-| **OCR Model**            | - | Coming soon...  |
+| **OCR Model**       | [BaiduYun:1X88](https://pan.baidu.com/s/1GfNQKIJ17Yf6QSv-dCaPEQ?pwd=1X88) | Released  |
 
 
 ## 🚧 Installation
