@@ -86,6 +86,21 @@ conda activate autohdr
 pip install -r requirements.txt
 ```
 
+## 🚀 RUN WebUI
+We provide two convenient ways to run the WebUI demo:
+
+**(1)** Visit our deployed online demo directly:
+[demo](http://121.41.49.212:8432/)
+
+**(2)** Run the demo locally:
+```bash
+CUDA_VISIBLE_DEVICES=<gpu_id> python demo_gradio.py
+```
+
+example:
+![Vis_3](images/demo.png)
+
+
 ## 📺 Inference
 Using AutoHDR for damaged historical documents repair:
 ```bash
