@@ -39,8 +39,9 @@
 - [x] Release inference code
 - [x] Release pretrained model
 - [x] Release a [WebUI](http://121.41.49.212:8432/)
-- [x] Upload pretrained model to Hugging Face
 - [ ] Release dataset
+- [ ] Upload pretrained model to Hugging Face
+
 
 
 
@@ -72,7 +73,7 @@ git clone https://github.com/SCUT-DLVCLab/AutoHDR.git
 
 **Step 1**: Download all model files (except the OCR model) from the [Model Zoo](#-model-zoo) and put them in the `ckpt` folder.
 
-**Step 2**: Download the OCR model files from the [Model Zoo](#-model-zoo) and put them in the `dist` folder.
+**Step 2**: Download the OCR model files from the [Model Zoo](#-model-zoo), unzip the package, and move the extracted files into the `dist` folder.
 
 **Step 3**: Create a conda environment and activate it.
 ```bash
