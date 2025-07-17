@@ -9,10 +9,11 @@
 <div align=center>
 
 [![arXiv preprint](http://img.shields.io/badge/arXiv-2507.05108-b31b1b)](https://arxiv.org/abs/2507.05108) 
-[![Gradio demo](https://img.shields.io/badge/Demo-AutoHDR-green)](http://121.41.49.212:8432/)
 [![GitHub ZZXF11](https://img.shields.io/badge/GitHub-ZZXF11-blueviolet?logo=github)](https://github.com/ZZXF11)
 [![SCUT DLVC Lab](https://img.shields.io/badge/SCUT-DLVC_Lab-327FE6?logo=Academia&logoColor=white)](http://dlvc-lab.net/lianwen/)
 [![Code](https://img.shields.io/badge/Code-AutoHDR-yellow)](https://github.com/SCUT-DLVCLab/AutoHDR)
+
+<!-- [![Gradio demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-AutoHDR-ff7c00)](https://github.com/SCUT-DLVCLab/AutoHDR) -->
 <!-- [![Homepage](https://img.shields.io/badge/Homepage-AutoHDR-green)]([https://](https://github.com/SCUT-DLVCLab/AutoHDR)) -->
 
 </div>
@@ -28,9 +29,7 @@
 - The modular design enables flexible adjustments, allowing AutoHDR to collaborate effectively with historians.
 
 ## 📅 News
-- **2025.07.17**: 🚀 The pretrained [model](#-model-zoo) has been released!
-- **2025.07.13**: 🔥🎉 The 💻 [demo](http://121.41.49.212:8432/) is now live! Welcome to try it out!
-- **2025.07.09**: Release the inference code.
+- **2025.07.09**: Release inference code.
 - **2025.07.08**: Our [paper](https://arxiv.org/abs/2507.05108) is now available on arXiv.
 - **2025.05.15**: 🎉🎉 Our [paper](https://arxiv.org/abs/2507.05108) is accepted by ACL2025 main.
 
@@ -38,26 +37,22 @@
 
 - [x] Release inference code
 - [x] Release pretrained model
-- [x] Release a [WebUI](http://121.41.49.212:8432/)
 - [ ] Release dataset
-- [ ] Upload pretrained model to Hugging Face
-
-
+- [ ] Release a WebUI
 
 
 ## 🔥 Model Zoo
-| **Model**                                    | **Checkpoint** | **Status** |
+| **Model**                                    | **chekcpoint** | **status** |
 |----------------------------------------------|----------------|------------|
 | **AutoHDR-Qwen2-1.5B**                   | [BaiduYun:W2wq](https://pan.baidu.com/s/1j_HmyNDG0dOD6TyBHvqYwQ?pwd=W2wq) | Released  |
 | **AutoHDR-Qwen2-7B**                     | [BaiduYun:6o84](https://pan.baidu.com/s/1CUREGQIBoed1BgHjELguTQ?pwd=6o84) | Released  |
-| **DiffHDR**         | [BaiduYun:63a3](https://pan.baidu.com/s/1fSKd5uQsiKp2uPQBdKtC3Q?pwd=63a3) | Released  |
+| **DiffHDR**                              | [BaiduYun:63a3](https://pan.baidu.com/s/1fSKd5uQsiKp2uPQBdKtC3Q?pwd=63a3) | Released  |
 | **Damage Localization Model**            | [BaiduYun:2QC7](https://pan.baidu.com/s/1wGcT6Ktzqg_bOyc8NsV4Ig?pwd=2QC7) | Released  |
-| **OCR Model**       | [BaiduYun:1X88](https://pan.baidu.com/s/1GfNQKIJ17Yf6QSv-dCaPEQ?pwd=1X88) | Released  |
+| **OCR Model**            | - | Coming soon...  |
 
 
 ## 🚧 Installation
-### Prerequisites
-- **Ubuntu 20.04**
+### Prerequisites (Recommended)
 - Linux
 - Python 3.10
 - Pytorch 2.3.0
@@ -71,20 +66,32 @@ git clone https://github.com/SCUT-DLVCLab/AutoHDR.git
 
 **Step 0**: Download and install Miniconda from the [official website](https://docs.conda.io/en/latest/miniconda.html).
 
-**Step 1**: Download all model files (except the OCR model) from the [Model Zoo](#-model-zoo) and put them in the `ckpt` folder.
-
-**Step 2**: Download the OCR model files from the [Model Zoo](#-model-zoo), unzip the package, and move the extracted files into the `dist` folder.
-
-**Step 3**: Create a conda environment and activate it.
+**Step 1**: Create a conda environment and activate it.
 ```bash
 conda create -n autohdr python=3.10 -y
 conda activate autohdr
 ```
 
-**Step 4**: Install the required packages.
+**Step 2**: Install the required packages.
 ```bash
 pip install -r requirements.txt
 ```
+## 🚀 RUN WebUI
+We provide two convenient ways to run the WebUI demo:
+
+
+**(1)** Visit our deployed online demo directly:
+[demo](http://121.41.49.212:8432/)
+
+
+**(2)** Run the demo locally:
+```bash
+CUDA_VISIBLE_DEVICES=<gpu_id> python demo_gradio.py
+```
+
+example:
+![Vis_3](images/demo.png)
+
 
 ## 📺 Inference
 Using AutoHDR for damaged historical documents repair:
@@ -92,7 +99,7 @@ Using AutoHDR for damaged historical documents repair:
 CUDA_VISIBLE_DEVICES=<gpu_id> python infer_pipeline.py
 ```
 
-## ☎️ Contact
+## ☎️ Cotact
 If you have any questions, feel free to contact [Yuyi Zhang](https://github.com/ZZXF11) at [yuyi.zhang11@foxmail.com](yuyi.zhang11@foxmail.com)
 
 ## 🌄 Gallery
