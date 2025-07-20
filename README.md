@@ -55,6 +55,11 @@
 | **OCR Model**       | [BaiduYun:1X88](https://pan.baidu.com/s/1GfNQKIJ17Yf6QSv-dCaPEQ?pwd=1X88) | Released  |
 
 
+## 🔥 FPHDR Dataset
+| **Dataset**             | **Link** | **status** |
+|----------|----------|-------------|
+| Real data | [BaiduYun:1000]() | coming soon |
+
 ## 🚧 Installation
 ### Prerequisites
 - **Ubuntu 20.04** (required)
