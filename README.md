@@ -58,7 +58,67 @@
 ## 🔥 FPHDR Dataset
 | **Dataset**             | **Link** | **status** |
 |----------|----------|-------------|
-| Real data | [BaiduYun:1000]() | coming soon |
+| Real data | [BaiduYun:983A](https://pan.baidu.com/s/1yEHdmu0EGb3w7Ug8-uPHwA?pwd=983A) | Released |
+| Synthetic data | - | Coming soon |
+
+**Note:**
+- The FPHDR dataset can only be used for non-commercial research purposes. For scholar or organization who wants to use the FPHDR dataset, please first fill in this [Application Form](./application-form/Application-Form-for-Using-FPHDR.docx) and sign the [Legal Commitment](./application-form/Legal-Commitment.docx) and email them to us ([eelwjin@scut.edu.cn](eelwjin@scut.edu.cn), cc: [yuyi.zhang11@foxmail.com](yuyi.zhang11@foxmail.com)). When submitting the application form to us, please list or attached 1-2 of your publications in the recent 6 years to indicate that you (or your team) do research in the related research fields of OCR, historical document analysis and restoration, document image processing, and so on.
+- We will give you the decompression password after your application has been received and approved.
+- All users must follow all use conditions; otherwise, the authorization will be revoked.
+
+<details>
+<summary><b>Dataset File Structure</b></summary>
+
+```plaintext
+images/
+  ├── FS_2_2_1.jpg
+  ├── FS_2_9_1.jpg
+  ├── ...
+labels/
+  ├── FS_2_2_1.json
+  ├── FS_2_9_1.json
+  ├── ...
+```
+</details>
+
+<details>
+<summary><b>Label Annotation Format</b></summary>
+
+```plaintext
+{
+  "columns": [
+    {
+      "x": ...,
+      "y": ...,
+      "w": ...,
+      "h": ...,
+      "column_id": "...",
+      "idx": ...
+    },
+    ...
+  ],
+  "chars": [
+    {
+      "x": ...,
+      "y": ...,
+      "w": ...,
+      "h": ...,
+      "txt": "...",
+      "cid": ...,
+      "char_id": "...",
+      "idx": ...,
+      "grade": "light|medium|severe|null"
+    },
+    ...
+  ]
+}
+```
+
+- columns: Column bounding boxes (x, y, w, h)
+- chars: Character annotations (txt, x, y, w, h, grade)
+- grade: Damage level (light, medium, severe, or empty for no damage)
+
+</details>
 
 ## 🚧 Installation
 ### Prerequisites
