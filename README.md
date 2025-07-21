@@ -28,6 +28,7 @@
 - The modular design enables flexible adjustments, allowing AutoHDR to collaborate effectively with historians.
 
 ## 📅 News
+- **2025.07.21**: 📢 Released the FPHDR dataset!
 - **2025.07.17**: 🚀 The pretrained [model](#-model-zoo) has been released!
 - **2025.07.13**: 🔥🎉 The 💻 [demo](http://121.41.49.212:8432/) is now live! Welcome to try it out!
 - **2025.07.09**: Release the inference code.
@@ -39,7 +40,7 @@
 - [x] Release inference code
 - [x] Release pretrained model
 - [x] Release a [WebUI](http://121.41.49.212:8432/)
-- [ ] Release dataset
+- [x] Release dataset
 - [ ] Upload pretrained model to Hugging Face
 
 
