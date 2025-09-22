@@ -60,7 +60,7 @@
 | **Dataset**             | **Link** | **status** |
 |----------|----------|-------------|
 | Real data | [BaiduYun:983A](https://pan.baidu.com/s/1yEHdmu0EGb3w7Ug8-uPHwA?pwd=983A) | Released |
-| Synthetic data | - | Coming soon |
+| Synthetic data | [BaiduYun:m8yn](https://pan.baidu.com/s/1Lrd51vChv72f2WZSNx8R2w?pwd=m8yn ) | Released |
 
 **Note:**
 - The FPHDR dataset can only be used for non-commercial research purposes. For scholar or organization who wants to use the FPHDR dataset, please first fill in this [Application Form](./application-form/Application-Form-for-Using-FPHDR.docx) and sign the [Legal Commitment](./application-form/Legal-Commitment.docx) and email them to us ([eelwjin@scut.edu.cn](eelwjin@scut.edu.cn), cc: [yuyi.zhang11@foxmail.com](yuyi.zhang11@foxmail.com)). When submitting the application form to us, please list or attached 1-2 of your publications in the recent 6 years to indicate that you (or your team) do research in the related research fields of OCR, historical document analysis and restoration, document image processing, and so on.
