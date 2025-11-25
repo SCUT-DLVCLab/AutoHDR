@@ -59,7 +59,7 @@
 ## 🔥 FPHDR Dataset
 | **Dataset**             | **Link** | **status** |
 |----------|----------|-------------|
-| Real data | [BaiduYun:983A](https://pan.baidu.com/s/1yEHdmu0EGb3w7Ug8-uPHwA?pwd=983A) | Released |
+| Real data | [BaiduYun:twgp](https://pan.baidu.com/s/1ql7DiXBXFEB-3n9-cASWcg?pwd=twgp) | Released |
 | Synthetic data | [BaiduYun:m8yn](https://pan.baidu.com/s/1Lrd51vChv72f2WZSNx8R2w?pwd=m8yn ) | Released |
 
 **Note:**
@@ -208,8 +208,3 @@ If you find AutoHDR helpful, please consider giving this repo a ⭐ and citing:
 }
 ```
 Thanks for your support!
-
-## ⭐ Star Rising
-[![Star Rising](https://api.star-history.com/svg?repos=SCUT-DLVCLab/AutoHDR&type=Timeline)](https://star-history.com/#SCUT-DLVCLab/AutoHDR&Timeline)
-
-
