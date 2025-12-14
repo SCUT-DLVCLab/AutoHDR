@@ -203,7 +203,7 @@ If you find AutoHDR helpful, please consider giving this repo a ⭐ and citing:
 @article{Zhang2025autohdr,
       title={Reviving Cultural Heritage: A Novel Approach for Comprehensive Historical Document Restoration}, 
       author={Yuyi Zhang and Peirong Zhang and Zhenhua Yang and Pengyu Yan and Yongxin Shi and Pengwei Liu and Fengjun Guo and Lianwen Jin},
-      journal={Proceedings of the 63nd Annual Meeting of the Association for Computational Linguistics},
+      journal={Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics},
       year={2025},
 }
 ```
