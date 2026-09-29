@@ -2,6 +2,8 @@
 
 # Reviving Cultural Heritage: A Novel Approach for Comprehensive Historical Document Restoration
 
+**English** | [简体中文](README_CN.md)
+
 </div>
 
 ![AutoHDR_LOGO](images/logo.png) 
