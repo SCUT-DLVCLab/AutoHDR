@@ -72,7 +72,7 @@
 | **数据集** | **下载链接** | **状态** |
 |---|---|---|
 | 真实数据 | [百度网盘：ryk3](https://pan.baidu.com/s/1zpS4B3E0eZJ9Hza-HxpX4w?pwd=ryk3) | 已发布 |
-| 合成数据 | [百度网盘：m8yn](https://pan.baidu.com/s/1Lrd51vChv72f2WZSNx8R2w?pwd=m8yn) | 已发布 |
+| 合成数据 | [百度网盘：qzsv](https://pan.baidu.com/s/1bqoddr-1NCF1D8H_xjQAXA?pwd=qzsv) | 已发布 |
 
 **说明：**
 
