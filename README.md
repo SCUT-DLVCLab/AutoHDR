@@ -69,14 +69,7 @@ The original data of the dataset is sourced from public channels such as the Int
 | Synthetic data | [BaiduYun:qzsv](https://pan.baidu.com/s/1bqoddr-1NCF1D8H_xjQAXA?pwd=qzsv) | Released |
 
 **Note:**
-- The FPHDR dataset can only be used for non-commercial research purposes. For scholar or organization who wants to use the FPHDR dataset, you can apply through either of the following two options:
-
-  **Option A: Apply Online**
-  Submit your application through our online platform: 👉 [Apply Here](http://121.41.49.212:9000/)
-
-  **Option B: Apply via Email**
-  Please first fill in this [Application Form](./application-form/Application-Form-for-Using-FPHDR.docx) and sign the [Legal Commitment](./application-form/Legal-Commitment.docx) and email them to us ([eelwjin@scut.edu.cn](mailto:eelwjin@scut.edu.cn), cc: [yuyi.zhang11@foxmail.com](mailto:yuyi.zhang11@foxmail.com)). When submitting the application form to us, please list or attached 1-2 of your publications in the recent 6 years to indicate that you (or your team) do research in the related research fields of OCR, historical document analysis and restoration, document image processing, and so on.
-
+- The FPHDR dataset is available exclusively for non-commercial research purposes. Researchers or organizations wishing to access the FPHDR dataset can submit an application through our online platform:  👉 [Apply Here](http://121.41.49.212:9000/)
 - We will give you the decompression password after your application has been received and approved.
 - All users must follow all use conditions; otherwise, the authorization will be revoked.
 
