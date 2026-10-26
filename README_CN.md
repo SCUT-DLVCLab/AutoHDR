@@ -76,13 +76,7 @@
 
 **说明：**
 
-- FPHDR 数据集仅限非商业科研用途。研究人员或机构可通过以下任一方式申请：
-
-  **方式 A：在线申请**  
-  通过在线平台提交申请：👉 [点击申请](http://121.41.49.212:9000/)
-
-  **方式 B：邮件申请**  
-  请填写[数据集使用申请表](./application-form/Application-Form-for-Using-FPHDR.docx)，签署[法律承诺书](./application-form/Legal-Commitment.docx)，并发送至 [eelwjin@scut.edu.cn](mailto:eelwjin@scut.edu.cn)，抄送 [yuyi.zhang11@foxmail.com](mailto:yuyi.zhang11@foxmail.com)。
+- FPHDR 数据集仅限非商业科研用途。研究人员或机构可通过在线平台提交申请：👉 [点击申请](http://121.41.49.212:9000/)
 
   提交申请时，请列出或附上近 6 年内的 1–2 篇论文，以说明您或您的团队从事 OCR、历史文档分析与修复、文档图像处理等相关研究。
 
